@@ -6,6 +6,125 @@
   let scheduled = false;
   let enabled = false;
 
+  const SLIDER_BOX = 32;
+
+  const PROGRESS_LOOK = {
+    bar: 3,
+    hoverBar: 5,
+    knob: 12,
+    inset: 0,
+    track: "rgba(255, 255, 255, 0.22)",
+    secondary: "rgba(255, 255, 255, 0.38)",
+    active: "linear-gradient(90deg, #ff0033 80%, #ff2791)",
+    knobColor: "#ff0033",
+    knobOnHover: true,
+  };
+
+  const VOLUME_LOOK = {
+    bar: 4,
+    hoverBar: 4,
+    knob: 12,
+    inset: 10,
+    track: "rgba(255, 255, 255, 0.28)",
+    secondary: "transparent",
+    active: "#e6e6e6",
+    knobColor: "#ffffff",
+    knobOnHover: false,
+  };
+
+  // tp-yt-paper-slider centers the bar with vertical padding on #sliderBar (that padding is
+  // also the click/drag target) and hangs the knob from a zero-height container at the top,
+  // so every size must be derived from one box height to keep bar, knob and hit area aligned.
+  function sliderCss(prefix, look) {
+    const p = prefix ? prefix + " " : "";
+    const hover = prefix ? `${prefix}:hover ` : ":host(:hover) ";
+    const pad = (bar) => (SLIDER_BOX - bar) / 2;
+    return `
+    ${p}#sliderContainer {
+      height: ${SLIDER_BOX}px !important;
+      margin: 0 ${look.inset}px !important;
+      width: auto !important;
+      opacity: 1 !important;
+    }
+    ${p}.bar-container {
+      top: 0 !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      height: auto !important;
+      opacity: 1 !important;
+    }
+    ${p}#sliderBar {
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: ${pad(look.bar)}px 0 !important;
+      box-sizing: content-box !important;
+      opacity: 1 !important;
+      cursor: pointer !important;
+    }
+    ${hover}#sliderBar {
+      padding: ${pad(look.hoverBar)}px 0 !important;
+    }
+    ${p}#progressContainer {
+      height: ${look.bar}px !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      border-radius: ${look.hoverBar}px !important;
+      overflow: hidden !important;
+      background: ${look.track} !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    ${hover}#progressContainer {
+      height: ${look.hoverBar}px !important;
+    }
+    ${p}#primaryProgress {
+      height: 100% !important;
+      background: ${look.active} !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    ${p}#secondaryProgress {
+      height: 100% !important;
+      background: ${look.secondary} !important;
+      opacity: 1 !important;
+    }
+    ${p}#sliderKnobContainer {
+      height: 0 !important;
+      margin: 0 !important;
+    }
+    ${p}#sliderKnob {
+      top: 0 !important;
+      width: ${SLIDER_BOX}px !important;
+      height: ${SLIDER_BOX}px !important;
+      margin: 0 0 0 -${SLIDER_BOX / 2}px !important;
+    }
+    ${p}.slider-knob-inner {
+      width: ${look.knob}px !important;
+      height: ${look.knob}px !important;
+      margin: ${pad(look.knob)}px !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      box-sizing: border-box !important;
+      border-radius: 50% !important;
+      background: ${look.knobColor} !important;
+      transform: scale(${look.knobOnHover ? 0 : 1}) !important;
+      transition: transform 0.12s ease !important;
+    }
+    ${hover}.slider-knob-inner {
+      transform: scale(1) !important;
+    }
+    ${p}.slider-knob-inner::before,
+    ${p}.slider-knob-inner::after,
+    ${p}#ink,
+    ${p}paper-ripple,
+    ${p}.slider-markers {
+      display: none !important;
+    }
+    `;
+  }
+
   const CSS = `
     html.sai-ytm-modern #player-bar-background {
       position: fixed !important;
@@ -45,80 +164,22 @@
 
     html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar {
       position: absolute !important;
-      top: -2px !important;
+      top: -${SLIDER_BOX / 2 - PROGRESS_LOOK.bar / 2}px !important;
       left: 0 !important;
       right: 0 !important;
       width: 100% !important;
-      height: 20px !important;
+      height: ${SLIDER_BOX}px !important;
       margin: 0 !important;
       padding: 0 !important;
+      transform: none !important;
       z-index: 20 !important;
       opacity: 1 !important;
+      visibility: visible !important;
+      display: block !important;
       pointer-events: auto !important;
-      --paper-slider-container-color: rgba(255, 255, 255, 0.28);
-      --paper-slider-active-color: #ff0033;
-      --paper-slider-secondary-color: rgba(255, 255, 255, 0.4);
-      --paper-slider-knob-color: #ff0033;
-      --paper-slider-knob-start-color: #ff0033;
-      --paper-slider-knob-start-border-color: #ff0033;
-      --paper-progress-container-color: rgba(255, 255, 255, 0.28);
-      --paper-progress-active-color: #ff0033;
-      --paper-progress-secondary-color: rgba(255, 255, 255, 0.4);
     }
 
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #sliderContainer,
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar .bar-container {
-      height: 20px !important;
-      margin: 0 !important;
-      opacity: 1 !important;
-    }
-
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #sliderBar {
-      height: 3px !important;
-      margin: 8.5px 0 !important;
-      opacity: 1 !important;
-    }
-
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #progressContainer {
-      height: 3px !important;
-      min-height: 3px !important;
-      background: rgba(255, 255, 255, 0.28) !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar:hover #sliderBar,
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar:hover #progressContainer {
-      height: 4px !important;
-    }
-
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #primaryProgress {
-      background: linear-gradient(90deg, #ff0033 80%, #ff2791) !important;
-      background-color: #ff0033 !important;
-      height: 100% !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #secondaryProgress {
-      background: rgba(255, 255, 255, 0.4) !important;
-      height: 100% !important;
-      opacity: 1 !important;
-    }
-
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar .slider-knob-inner {
-      background: #ff0033 !important;
-      border: 0 !important;
-      box-shadow: none !important;
-      width: 12px !important;
-      height: 12px !important;
-      z-index: 21 !important;
-    }
-
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #sliderKnob {
-      z-index: 21 !important;
-      margin-top: 0 !important;
-    }
+    ${sliderCss("html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar", PROGRESS_LOOK)}
 
     html.sai-ytm-modern .sai-modern-row {
       display: flex !important;
@@ -126,14 +187,16 @@
       height: 72px !important;
       width: 100% !important;
       box-sizing: border-box !important;
-      padding: 8px 12px 0 !important;
+      padding: 4px 12px 0 !important;
       gap: 16px !important;
-      position: relative !important;
+      position: absolute !important;
+      left: 0 !important;
+      right: 0 !important;
+      top: 0 !important;
+      bottom: auto !important;
       z-index: 1 !important;
       overflow: visible !important;
       margin: 0 !important;
-      top: auto !important;
-      bottom: auto !important;
       transform: none !important;
     }
 
@@ -274,73 +337,66 @@
       flex: none !important;
     }
 
-    html.sai-ytm-modern .sai-volume-wrap #volume-slider {
+    html.sai-ytm-modern .sai-volume-pop {
       position: absolute !important;
       left: 50% !important;
-      bottom: calc(100% + 12px) !important;
-      transform: translateX(-50%) rotate(-90deg) !important;
-      transform-origin: center center !important;
-      width: 108px !important;
-      height: 32px !important;
-      margin: 0 !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-      transition: opacity 0.12s ease;
-      z-index: 50 !important;
-      background: rgb(48, 48, 48) !important;
-      border-radius: 16px !important;
-      padding: 0 10px !important;
+      bottom: calc(100% + 8px) !important;
+      width: 40px !important;
+      height: 132px !important;
+      transform: translateX(-50%) !important;
+      box-sizing: border-box !important;
+      background: rgb(40, 40, 40) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 20px !important;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transition: opacity 0.12s ease, visibility 0.12s ease !important;
+      z-index: 50 !important;
       overflow: visible !important;
-      --paper-slider-container-color: #c8c8c8;
-      --paper-progress-container-color: #c8c8c8;
-      --paper-slider-active-color: #ffffff;
-      --paper-progress-active-color: #ffffff;
-      --paper-slider-knob-color: #ffffff;
-      --paper-slider-knob-start-color: #ffffff;
-      --paper-slider-knob-start-border-color: #ffffff;
     }
 
-    html.sai-ytm-modern .sai-volume-wrap:hover #volume-slider,
-    html.sai-ytm-modern .sai-volume-wrap:focus-within #volume-slider,
-    html.sai-ytm-modern .sai-volume-wrap.sai-volume-open #volume-slider {
+    html.sai-ytm-modern .sai-volume-pop::after {
+      content: "" !important;
+      position: absolute !important;
+      left: 0 !important;
+      right: 0 !important;
+      top: 100% !important;
+      height: 12px !important;
+    }
+
+    html.sai-ytm-modern .sai-volume-wrap.sai-volume-open .sai-volume-pop {
       opacity: 1 !important;
+      visibility: visible !important;
       pointer-events: auto !important;
     }
 
-    html.sai-ytm-modern .sai-volume-wrap #volume-slider #sliderContainer,
-    html.sai-ytm-modern .sai-volume-wrap #volume-slider .bar-container {
-      height: 32px !important;
-      opacity: 1 !important;
+    html.sai-ytm-modern .sai-volume-wrap.sai-volume-open .sai-volume-pop #volume-slider,
+    html.sai-ytm-modern .sai-volume-wrap.sai-volume-open .sai-volume-pop #volume-slider * {
+      pointer-events: auto !important;
     }
 
-    html.sai-ytm-modern .sai-volume-wrap #volume-slider #sliderBar {
-      height: 4px !important;
-      margin: 14px 0 !important;
-      opacity: 1 !important;
-    }
-
-    html.sai-ytm-modern .sai-volume-wrap #volume-slider #progressContainer {
-      height: 4px !important;
-      min-height: 4px !important;
-      background: #c8c8c8 !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-
-    html.sai-ytm-modern .sai-volume-wrap #volume-slider #primaryProgress {
-      background: #ffffff !important;
-      height: 100% !important;
+    html.sai-ytm-modern .sai-volume-pop #volume-slider {
+      position: absolute !important;
+      left: 50% !important;
+      top: 50% !important;
+      width: 108px !important;
+      min-width: 108px !important;
+      max-width: 108px !important;
+      height: ${SLIDER_BOX}px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: translate(-50%, -50%) rotate(-90deg) !important;
+      transform-origin: center center !important;
+      background: transparent !important;
       opacity: 1 !important;
       visibility: visible !important;
+      display: block !important;
+      overflow: visible !important;
     }
 
-    html.sai-ytm-modern .sai-volume-wrap #volume-slider .slider-knob-inner {
-      background: #ffffff !important;
-      border: 0 !important;
-      width: 12px !important;
-      height: 12px !important;
-    }
+    ${sliderCss("html.sai-ytm-modern .sai-volume-pop #volume-slider", VOLUME_LOOK)}
 
     html.sai-ytm-modern .sai-modern-on [hidden] {
       display: none !important;
@@ -365,39 +421,44 @@
     }
   `;
 
-  function isEnabledFlag(stored) {
-    return !stored || stored[MOD_ID] !== false;
+  function readEnabled(data) {
+    const map = Object.assign(
+      {},
+      data.builtinEnabled && typeof data.builtinEnabled === "object" ? data.builtinEnabled : null,
+      data.modEnabled && typeof data.modEnabled === "object" ? data.modEnabled : null
+    );
+    return map[MOD_ID] === true;
   }
 
-  function boot() {
-    injectStyle(document.head || document.documentElement);
-    const storage = globalThis.chrome?.storage?.local;
-    if (!storage) {
+  function applyEnabled(on) {
+    if (on) {
+      if (enabled) {
+        schedule();
+        return;
+      }
       enabled = true;
       document.documentElement.classList.add("sai-ytm-modern");
       start();
       return;
     }
-    storage.get("builtinEnabled", (data) => {
-      if (isEnabledFlag(data.builtinEnabled)) {
-        enabled = true;
-        document.documentElement.classList.add("sai-ytm-modern");
-        start();
-      } else {
-        enabled = false;
-        stop();
-      }
+    if (!enabled) return;
+    enabled = false;
+    stop();
+  }
+
+  function boot() {
+    injectStyle(document.head || document.documentElement);
+    const storage = globalThis.chrome?.storage?.local;
+    if (!storage) return;
+    storage.get(["modEnabled", "builtinEnabled"], (data) => {
+      applyEnabled(readEnabled(data));
     });
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== "local" || !changes.builtinEnabled) return;
-      if (isEnabledFlag(changes.builtinEnabled.newValue)) {
-        enabled = true;
-        document.documentElement.classList.add("sai-ytm-modern");
-        start();
-      } else {
-        enabled = false;
-        stop();
-      }
+      if (area !== "local") return;
+      if (!changes.modEnabled && !changes.builtinEnabled) return;
+      storage.get(["modEnabled", "builtinEnabled"], (data) => {
+        applyEnabled(readEnabled(data));
+      });
     });
   }
 
@@ -448,7 +509,8 @@
       parent.classList?.contains("sai-modern-left") ||
       parent.classList?.contains("sai-modern-middle") ||
       parent.classList?.contains("sai-modern-right") ||
-      parent.classList?.contains("sai-volume-wrap")
+      parent.classList?.contains("sai-volume-wrap") ||
+      parent.classList?.contains("sai-volume-pop")
     ) {
       return;
     }
@@ -500,6 +562,114 @@
     };
   }
 
+  // paper-slider maps pointer X against the bar's untransformed width, so the rotated slider
+  // is driven by translating the pointer's vertical position into the X it expects.
+  function bindVerticalVolume(pop) {
+    let dragging = false;
+    let forwarding = false;
+    const sliderBar = () => pop.querySelector("#volume-slider #sliderBar");
+
+    function pointFor(ratio) {
+      const bar = sliderBar();
+      const rect = bar.getBoundingClientRect();
+      const clamped = Math.min(1, Math.max(0, ratio));
+      return { x: rect.left + clamped * bar.offsetWidth, y: rect.top + rect.height / 2 };
+    }
+
+    function ratioFromEvent(event) {
+      const rect = sliderBar().getBoundingClientRect();
+      return rect.height ? (rect.bottom - event.clientY) / rect.height : 0;
+    }
+
+    function send(type, target, ratio) {
+      const { x, y } = pointFor(ratio);
+      forwarding = true;
+      try {
+        target.dispatchEvent(
+          new MouseEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            clientX: x,
+            clientY: y,
+            screenX: x,
+            screenY: y,
+            button: 0,
+            buttons: type === "mouseup" ? 0 : 1,
+          })
+        );
+      } finally {
+        forwarding = false;
+      }
+    }
+
+    // Polymer gestures listen for mousedown in the document capture phase, so only a window
+    // capture listener runs early enough to replace the real event.
+    window.addEventListener(
+      "mousedown",
+      (event) => {
+        if (forwarding || event.button !== 0 || !pop.isConnected) return;
+        if (!(event.target instanceof Node) || !pop.contains(event.target) || !sliderBar()) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        dragging = true;
+        send("mousedown", sliderBar(), ratioFromEvent(event));
+      },
+      true
+    );
+
+    // Polymer derives a tap from the real click and paper-slider would re-apply the raw X,
+    // so the click never reaches the page's listeners.
+    window.addEventListener(
+      "click",
+      (event) => {
+        if (forwarding || !pop.isConnected) return;
+        if (!(event.target instanceof Node) || !pop.contains(event.target)) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      },
+      true
+    );
+
+    // Polymer's synthetic tap bubbles to ytmusic-player-bar, which toggles the player page.
+    pop.addEventListener("tap", (event) => event.stopPropagation());
+
+    window.addEventListener(
+      "mousemove",
+      (event) => {
+        if (!dragging || forwarding) return;
+        event.stopImmediatePropagation();
+        send("mousemove", document, ratioFromEvent(event));
+      },
+      true
+    );
+
+    window.addEventListener(
+      "mouseup",
+      (event) => {
+        if (!dragging || forwarding) return;
+        dragging = false;
+        event.stopImmediatePropagation();
+        send("mouseup", document, ratioFromEvent(event));
+      },
+      true
+    );
+
+    pop.addEventListener(
+      "wheel",
+      (event) => {
+        const slider = pop.querySelector("#volume-slider");
+        if (!slider || !sliderBar()) return;
+        event.preventDefault();
+        const current = Number(slider.getAttribute("aria-valuenow")) || 0;
+        const next = (current + (event.deltaY < 0 ? 5 : -5)) / 100;
+        send("mousedown", sliderBar(), next);
+        send("mouseup", document, next);
+      },
+      { passive: false }
+    );
+  }
+
   function ensureVolumeWrap(right, volumeBtn, volumeSlider) {
     let wrap = right.querySelector(":scope > .sai-volume-wrap");
     if (!wrap) {
@@ -507,9 +677,16 @@
       wrap.className = "sai-volume-wrap";
       right.appendChild(wrap);
     }
-    if (volumeSlider && volumeSlider.parentNode !== wrap) {
+    let pop = wrap.querySelector(":scope > .sai-volume-pop");
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.className = "sai-volume-pop";
+      bindVerticalVolume(pop);
+      wrap.prepend(pop);
+    }
+    if (volumeSlider && volumeSlider.parentNode !== pop) {
       remember(volumeSlider);
-      wrap.appendChild(volumeSlider);
+      pop.appendChild(volumeSlider);
     }
     if (volumeBtn && volumeBtn.parentNode !== wrap) {
       remember(volumeBtn);
@@ -517,8 +694,15 @@
     }
     if (!wrap.dataset.saiBound) {
       wrap.dataset.saiBound = "1";
-      const open = () => wrap.classList.add("sai-volume-open");
-      const close = () => wrap.classList.remove("sai-volume-open");
+      let closeTimer = 0;
+      const open = () => {
+        clearTimeout(closeTimer);
+        wrap.classList.add("sai-volume-open");
+      };
+      const close = () => {
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => wrap.classList.remove("sai-volume-open"), 250);
+      };
       wrap.addEventListener("mouseenter", open);
       wrap.addEventListener("mouseleave", close);
       wrap.addEventListener("focusin", open);
@@ -542,6 +726,7 @@
         ".content-info-wrapper",
         "#like-button-renderer",
         "ytmusic-menu-renderer.menu",
+        ".captions",
         "#volume-slider",
         ".volume",
         ".repeat",
@@ -596,9 +781,10 @@
     placeSequence(columns.left, [thumb, content]);
     placeSequence(columns.middle, [shuffle, rate, rewind, previous, play, spinner, seekForward, next, repeat]);
     dedupeMiddleControls(columns.middle, { shuffle, repeat });
-    styleProgressBar(bar);
-    placeSequence(columns.right, [time, likes]);
+    const captions = bar.querySelector(".right-controls-buttons > .captions") || bar.querySelector("yt-icon-button.captions");
+    placeSequence(columns.right, [time, likes, captions]);
     const wrap = ensureVolumeWrap(columns.right, volumeBtn, volumeSlider);
+    styleProgressBar(bar);
     if (menu) {
       remember(menu);
       try {
@@ -625,96 +811,30 @@
     });
   }
 
+  function styleSliderShadow(slider, styleId, look) {
+    if (!slider) return;
+    // Light-DOM <style> children leak page-wide under Shady DOM; only real shadow roots get one.
+    slider.querySelectorAll(":scope > #sai-progress-fix, :scope > #sai-volume-fix").forEach((el) => el.remove());
+    const roots = [];
+    if (slider.shadowRoot) roots.push(slider.shadowRoot);
+    slider.shadowRoot?.querySelectorAll("*").forEach((el) => {
+      if (el.shadowRoot) roots.push(el.shadowRoot);
+    });
+    const cssText = sliderCss("", look);
+    roots.forEach((root) => {
+      let style = root.querySelector(`#${styleId}`);
+      if (!style) {
+        style = document.createElement("style");
+        style.id = styleId;
+        root.appendChild(style);
+      }
+      if (style.textContent !== cssText) style.textContent = cssText;
+    });
+  }
+
   function styleProgressBar(bar) {
-    const progress = bar.querySelector("#progress-bar");
-    if (!progress) return;
-
-    const cssText = `
-      #sliderContainer, .bar-container { height: 20px !important; opacity: 1 !important; }
-      #sliderBar { height: 3px !important; margin: 8.5px 0 !important; opacity: 1 !important; }
-      #progressContainer {
-        height: 3px !important;
-        min-height: 3px !important;
-        background: rgba(255, 255, 255, 0.28) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      #primaryProgress {
-        background: linear-gradient(90deg, #ff0033 80%, #ff2791) !important;
-        height: 100% !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      #secondaryProgress {
-        background: rgba(255, 255, 255, 0.4) !important;
-        height: 100% !important;
-        opacity: 1 !important;
-      }
-      .slider-knob-inner {
-        background: #ff0033 !important;
-        border: 0 !important;
-        width: 12px !important;
-        height: 12px !important;
-      }
-    `;
-
-    const targets = [progress];
-    if (progress.shadowRoot) targets.push(progress.shadowRoot);
-    progress.querySelectorAll("*").forEach((el) => {
-      if (el.shadowRoot) targets.push(el.shadowRoot);
-    });
-
-    targets.forEach((root) => {
-      if (!root.querySelector) return;
-      let style = root.querySelector("#sai-progress-fix");
-      if (!style) {
-        style = document.createElement("style");
-        style.id = "sai-progress-fix";
-        root.appendChild(style);
-      }
-      style.textContent = cssText;
-    });
-
-    const vol = bar.querySelector(".sai-volume-wrap #volume-slider");
-    if (!vol) return;
-    const volCss = `
-      #sliderContainer, .bar-container { height: 32px !important; opacity: 1 !important; }
-      #sliderBar { height: 4px !important; margin: 14px 0 !important; opacity: 1 !important; }
-      #progressContainer {
-        height: 4px !important;
-        min-height: 4px !important;
-        background: #c8c8c8 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      #primaryProgress {
-        background: #ffffff !important;
-        height: 100% !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-      }
-      .slider-knob-inner {
-        background: #ffffff !important;
-        border: 0 !important;
-        width: 12px !important;
-        height: 12px !important;
-      }
-    `;
-    const volTargets = [vol];
-    if (vol.shadowRoot) volTargets.push(vol.shadowRoot);
-    vol.querySelectorAll("*").forEach((el) => {
-      if (el.shadowRoot) volTargets.push(el.shadowRoot);
-    });
-    volTargets.forEach((root) => {
-      if (!root.querySelector) return;
-      let style = root.querySelector("#sai-volume-fix");
-      if (!style) {
-        style = document.createElement("style");
-        style.id = "sai-volume-fix";
-        root.appendChild(style);
-      }
-      style.textContent = volCss;
-    });
+    styleSliderShadow(bar.querySelector("#progress-bar"), "sai-progress-fix", PROGRESS_LOOK);
+    styleSliderShadow(bar.querySelector(".sai-volume-pop #volume-slider"), "sai-volume-fix", VOLUME_LOOK);
   }
 
   function restore() {
@@ -741,11 +861,20 @@
       });
     });
     homes.clear();
-    document.querySelectorAll(".sai-modern-row, .sai-volume-wrap").forEach((el) => {
-      while (el.firstChild) el.parentNode?.insertBefore(el.firstChild, el);
-      el.remove();
-    });
+    document
+      .querySelectorAll(
+        ".sai-modern-row, .sai-modern-left, .sai-modern-middle, .sai-modern-right, .sai-volume-wrap, .sai-volume-pop"
+      )
+      .forEach((el) => {
+        while (el.firstChild) el.parentNode?.insertBefore(el.firstChild, el);
+        el.remove();
+      });
     document.querySelectorAll(".sai-modern-on").forEach((el) => el.classList.remove("sai-modern-on"));
+    document.querySelectorAll("#progress-bar, #volume-slider").forEach((slider) => {
+      [slider, slider.shadowRoot].forEach((root) => {
+        root?.querySelectorAll?.("#sai-progress-fix, #sai-volume-fix").forEach((style) => style.remove());
+      });
+    });
   }
 
   boot();

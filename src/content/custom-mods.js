@@ -1,21 +1,22 @@
 (() => {
   function collectMods(data) {
-    const enabledMap = data.builtinEnabled && typeof data.builtinEnabled === "object" ? data.builtinEnabled : {};
+    const enabledMap = SAI.modEnabledMap(
+      SAI.mergeEnabledMaps(data.builtinEnabled, data.modEnabled),
+      data.syncedMods
+    );
     const synced = Array.isArray(data.syncedMods) ? data.syncedMods : [];
     const custom = Array.isArray(data.customMods) ? data.customMods : [];
 
-    const fromSynced = synced.map((mod) => {
-      const enabled = Object.prototype.hasOwnProperty.call(enabledMap, mod.id)
-        ? enabledMap[mod.id] !== false
-        : mod.enabled !== false;
-      return { ...mod, enabled };
-    });
+    const fromSynced = synced.map((mod) => ({
+      ...mod,
+      enabled: SAI.isModEnabled(mod.id, enabledMap, mod),
+    }));
 
     return [...fromSynced, ...custom];
   }
 
   function apply() {
-    chrome.storage.local.get(["customMods", "syncedMods", "builtinEnabled"], (data) => {
+    chrome.storage.local.get(["customMods", "syncedMods", "modEnabled", "builtinEnabled"], (data) => {
       const mods = collectMods(data);
       const active = new Set();
 
@@ -44,6 +45,11 @@
 
   apply();
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && (changes.customMods || changes.syncedMods || changes.builtinEnabled)) apply();
+    if (
+      area === "local" &&
+      (changes.customMods || changes.syncedMods || changes.modEnabled || changes.builtinEnabled)
+    ) {
+      apply();
+    }
   });
 })();

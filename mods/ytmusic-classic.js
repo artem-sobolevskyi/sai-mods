@@ -295,39 +295,44 @@
     }
   `;
 
-  function isEnabledFlag(stored) {
-    return !stored || stored[MOD_ID] !== false;
+  function readEnabled(data) {
+    const map = Object.assign(
+      {},
+      data.builtinEnabled && typeof data.builtinEnabled === "object" ? data.builtinEnabled : null,
+      data.modEnabled && typeof data.modEnabled === "object" ? data.modEnabled : null
+    );
+    return map[MOD_ID] === true;
   }
 
-  function boot() {
-    injectStyle(document.head || document.documentElement);
-    const storage = globalThis.chrome?.storage?.local;
-    if (!storage) {
+  function applyEnabled(on) {
+    if (on) {
+      if (enabled) {
+        schedule();
+        return;
+      }
       enabled = true;
       document.documentElement.classList.add("sai-ytm-classic");
       start();
       return;
     }
-    storage.get("builtinEnabled", (data) => {
-      if (isEnabledFlag(data.builtinEnabled)) {
-        enabled = true;
-        document.documentElement.classList.add("sai-ytm-classic");
-        start();
-      } else {
-        enabled = false;
-        stop();
-      }
+    if (!enabled) return;
+    enabled = false;
+    stop();
+  }
+
+  function boot() {
+    injectStyle(document.head || document.documentElement);
+    const storage = globalThis.chrome?.storage?.local;
+    if (!storage) return;
+    storage.get(["modEnabled", "builtinEnabled"], (data) => {
+      applyEnabled(readEnabled(data));
     });
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== "local" || !changes.builtinEnabled) return;
-      if (isEnabledFlag(changes.builtinEnabled.newValue)) {
-        enabled = true;
-        document.documentElement.classList.add("sai-ytm-classic");
-        start();
-      } else {
-        enabled = false;
-        stop();
-      }
+      if (area !== "local") return;
+      if (!changes.modEnabled && !changes.builtinEnabled) return;
+      storage.get(["modEnabled", "builtinEnabled"], (data) => {
+        applyEnabled(readEnabled(data));
+      });
     });
   }
 

@@ -1,6 +1,6 @@
 {
-  "version": "1.3.0",
-  "releaseNotes": "All mods sync from GitHub. Fixed modern timeline track and light-gray vertical volume slider.",
+  "version": "1.4.3",
+  "releaseNotes": "Modern bar: timeline aligned to the top edge with a reliable click area; vertical volume popup now responds to click, drag and wheel.",
   "mods": [
     {
       "id": "ytmusic-classic",
@@ -10,7 +10,7 @@
       "js": "mods/ytmusic-classic.js",
       "css": "",
       "group": "builtin",
-      "enabledByDefault": true
+      "enabledByDefault": false
     },
     {
       "id": "ytmusic-modern",
@@ -20,7 +20,7 @@
       "js": "mods/ytmusic-modern.js",
       "css": "",
       "group": "builtin",
-      "enabledByDefault": true
+      "enabledByDefault": false
     },
     {
       "id": "remote-ytm-hide-upsell",

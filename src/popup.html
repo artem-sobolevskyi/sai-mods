@@ -8,7 +8,7 @@
 </head>
 <body class="popup">
   <header class="top">
-    <div class="mark" aria-hidden="true"></div>
+    <img class="mark" src="../icons/icon48.png" width="32" height="32" alt="" aria-hidden="true">
     <div>
       <h1>SAI Mods</h1>
       <p>Appearance mods for the sites you choose</p>
@@ -17,9 +17,9 @@
 
   <section class="update-card" aria-label="Updates">
     <div class="update-head">
-      <div>
+      <div class="update-title">
         <div class="section-label tight">Updates</div>
-        <p id="version-line" class="update-version">Version …</p>
+        <div id="version-line" class="update-version"></div>
       </div>
       <button id="update" class="primary compact" type="button">Update</button>
     </div>
@@ -28,21 +28,20 @@
       <button id="download" class="ghost" type="button">Download ZIP</button>
       <button id="open-github" class="ghost" type="button">Open GitHub</button>
     </div>
-    <p class="update-hint">Pulls every mod config from GitHub (classic, modern, and extras), then offers a ZIP if the extension package itself is newer.</p>
+    <p class="update-hint">Pulls every mod from GitHub into one list. Toggle a mod, then the matching tab reloads so it applies right away.</p>
   </section>
 
-  <div class="section-label">Built-in</div>
-  <div id="builtin" class="list"></div>
-  <div class="section-label">From GitHub</div>
-  <div id="remote" class="list"></div>
-  <p id="remote-empty" class="empty">No extra GitHub mods yet. Press Update to sync.</p>
+  <div class="section-label">Mods</div>
+  <div id="mods" class="list"></div>
+  <p id="mods-empty" class="empty">No mods yet. Press Update to sync from GitHub.</p>
+
   <div class="section-label">Yours</div>
   <div id="custom" class="list"></div>
   <p id="empty" class="empty" hidden>No custom mods yet. Create one and paste CSS or JavaScript.</p>
   <div class="footer">
     <button id="create" class="primary" type="button">Create mod</button>
   </div>
-  <p class="note">Custom JavaScript needs the Allow user scripts permission on the extension page. CSS applies immediately. Reload the tab after changing a script. After downloading a new ZIP, replace the extension folder and click Reload on chrome://extensions.</p>
+  <p class="note">Custom JavaScript needs Allow user scripts on the extension page. After Update, wait for sync to finish before toggling mods.</p>
   <script src="shared.js"></script>
   <script src="popup.js"></script>
 </body>

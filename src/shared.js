@@ -174,12 +174,44 @@ SAI.storageSet = function storageSet(value) {
   });
 };
 
+SAI.mergeEnabledMaps = function mergeEnabledMaps(...maps) {
+  const out = {};
+  for (const map of maps) {
+    if (!map || typeof map !== "object") continue;
+    for (const [key, value] of Object.entries(map)) {
+      if (typeof value === "boolean") out[key] = value;
+    }
+  }
+  return out;
+};
+
 SAI.builtinEnabledMap = function builtinEnabledMap(stored) {
-  const map = stored && typeof stored === "object" ? { ...stored } : {};
+  return SAI.modEnabledMap(stored, null);
+};
+
+SAI.modEnabledMap = function modEnabledMap(stored, syncedMods) {
+  const map = SAI.mergeEnabledMaps(stored);
+  const mods = Array.isArray(syncedMods) ? syncedMods : [];
+  for (const mod of mods) {
+    if (!mod?.id) continue;
+    if (typeof map[mod.id] !== "boolean") {
+      if (typeof mod.enabled === "boolean") map[mod.id] = mod.enabled;
+      else map[mod.id] = mod.enabledByDefault === true;
+    }
+  }
   for (const id of SAI.BUILTIN_IDS) {
-    if (typeof map[id] !== "boolean") map[id] = true;
+    if (typeof map[id] !== "boolean") map[id] = false;
   }
   return map;
+};
+
+SAI.isModEnabled = function isModEnabled(id, storedMaps, mod) {
+  const map = SAI.mergeEnabledMaps(
+    ...(Array.isArray(storedMaps) ? storedMaps : [storedMaps])
+  );
+  if (Object.prototype.hasOwnProperty.call(map, id)) return map[id] === true;
+  if (mod && typeof mod.enabled === "boolean") return mod.enabled === true;
+  return mod?.enabledByDefault === true;
 };
 
 SAI.modsFromSynced = function modsFromSynced(syncedMods, group) {

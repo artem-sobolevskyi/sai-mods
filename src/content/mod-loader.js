@@ -7,7 +7,12 @@
 
   async function ensureCatalog() {
     const data = await storageGet("syncedMods");
-    if (Array.isArray(data.syncedMods) && data.syncedMods.length) return;
+    const mods = Array.isArray(data.syncedMods) ? data.syncedMods : [];
+    const missingPlayerJs = SAI.BUILTIN_IDS.some((id) => {
+      const mod = mods.find((item) => item?.id === id);
+      return !mod || !String(mod.js || "").trim();
+    });
+    if (mods.length && !missingPlayerJs) return;
     try {
       await chrome.runtime.sendMessage({ type: "ensure-mods" });
     } catch {
@@ -17,19 +22,19 @@
 
   async function runFromStorage() {
     await ensureCatalog();
-    const data = await storageGet(["syncedMods", "builtinEnabled"]);
+    const data = await storageGet(["syncedMods", "modEnabled", "builtinEnabled"]);
     const mods = Array.isArray(data.syncedMods) ? data.syncedMods : [];
-    const enabledMap = data.builtinEnabled && typeof data.builtinEnabled === "object" ? data.builtinEnabled : {};
+    const enabledMap = SAI.modEnabledMap(
+      SAI.mergeEnabledMaps(data.modEnabled, data.builtinEnabled),
+      mods
+    );
 
     for (const mod of mods) {
       if (!mod?.id || !String(mod.js || "").trim()) continue;
-      const enabled = Object.prototype.hasOwnProperty.call(enabledMap, mod.id)
-        ? enabledMap[mod.id] !== false
-        : mod.enabled !== false;
-      if (!enabled) continue;
-      if (mod.matches?.length && typeof SAI !== "undefined" && !SAI.urlMatches(location.href, mod.matches)) {
-        continue;
-      }
+      // Packaged player-bar mods run as content scripts — avoid double start.
+      if (SAI.BUILTIN_IDS.includes(mod.id)) continue;
+      if (!SAI.isModEnabled(mod.id, enabledMap, mod)) continue;
+      if (mod.matches?.length && !SAI.urlMatches(location.href, mod.matches)) continue;
       if (ran.has(mod.id)) continue;
       try {
         ran.add(mod.id);
@@ -44,6 +49,8 @@
 
   runFromStorage();
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && (changes.syncedMods || changes.builtinEnabled)) runFromStorage();
+    if (area === "local" && (changes.syncedMods || changes.modEnabled || changes.builtinEnabled)) {
+      runFromStorage();
+    }
   });
 })();

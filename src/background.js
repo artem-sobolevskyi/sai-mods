@@ -4,17 +4,19 @@ let syncChain = Promise.resolve();
 let seedPromise = null;
 
 chrome.runtime.onInstalled.addListener(() => {
-  seedAndSync();
+  seedAndSync(true);
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  seedAndSync();
+  seedAndSync(true);
 });
 
-seedAndSync();
+seedAndSync(true);
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && (changes.customMods || changes.syncedMods)) syncUserScripts();
+  if (area === "local" && (changes.customMods || changes.syncedMods || changes.modEnabled || changes.builtinEnabled)) {
+    syncUserScripts();
+  }
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -23,7 +25,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
   if (message?.type === "ensure-mods") {
-    seedAndSync()
+    seedAndSync(true)
       .then(async () => {
         const data = await SAI.storageGet("syncedMods");
         sendResponse({ ok: true, count: (data.syncedMods || []).length });
@@ -47,34 +49,75 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return undefined;
 });
 
-function seedAndSync() {
+function seedAndSync(force = false) {
+  if (force) seedPromise = null;
   if (!seedPromise) {
     seedPromise = ensureSyncedMods()
       .then(syncUserScripts)
-      .catch((error) => console.error("[SAI Mods] seed failed", error));
+      .catch((error) => {
+        console.error("[SAI Mods] seed failed", error);
+        seedPromise = null;
+        throw error;
+      });
   }
   return seedPromise;
 }
 
 async function ensureSyncedMods() {
-  const data = await SAI.storageGet(["syncedMods", "builtinEnabled"]);
-  if (!Array.isArray(data.syncedMods) || !data.syncedMods.length) {
-    const seeded = await loadBundledCatalog();
-    await SAI.storageSet({
-      syncedMods: seeded,
-      builtinEnabled: SAI.builtinEnabledMap(data.builtinEnabled),
+  const data = await SAI.storageGet(["syncedMods", "builtinEnabled", "modEnabled"]);
+  const bundled = await loadBundledCatalog();
+  const existing = Array.isArray(data.syncedMods) ? data.syncedMods : [];
+  const existingMap = new Map(existing.map((mod) => [mod.id, mod]));
+
+  const needsRefresh =
+    !existing.length ||
+    bundled.some((bundledMod) => {
+      const current = existingMap.get(bundledMod.id);
+      if (!current) return true;
+      if (String(bundledMod.js || "").trim() && !String(current.js || "").trim()) return true;
+      if (String(bundledMod.css || "").trim() && !String(current.css || "").trim()) return true;
+      return false;
     });
-    return seeded;
+
+  const enabledSource = SAI.mergeEnabledMaps(data.builtinEnabled, data.modEnabled);
+
+  if (!needsRefresh) {
+    const enabledMap = SAI.modEnabledMap(enabledSource, existing);
+    await SAI.storageSet({ modEnabled: enabledMap, builtinEnabled: enabledMap });
+    return existing;
   }
-  if (!data.builtinEnabled) {
-    await SAI.storageSet({ builtinEnabled: SAI.builtinEnabledMap(null) });
+
+  const enabledMap = SAI.modEnabledMap(enabledSource, [...existing, ...bundled]);
+  const merged = bundled.map((mod) => {
+    const old = existingMap.get(mod.id);
+    const enabled = Object.prototype.hasOwnProperty.call(enabledMap, mod.id)
+      ? enabledMap[mod.id] === true
+      : old
+        ? old.enabled === true
+        : mod.enabledByDefault === true;
+    return { ...mod, enabled };
+  });
+
+  for (const old of existing) {
+    if (merged.some((mod) => mod.id === old.id)) continue;
+    if (String(old.js || "").trim() || String(old.css || "").trim()) merged.push(old);
   }
-  return data.syncedMods;
+
+  for (const mod of merged) {
+    if (typeof enabledMap[mod.id] !== "boolean") enabledMap[mod.id] = mod.enabled === true;
+  }
+
+  await SAI.storageSet({
+    syncedMods: merged,
+    modEnabled: enabledMap,
+    builtinEnabled: enabledMap,
+  });
+  return merged;
 }
 
 async function loadBundledCatalog() {
   const localUpdate = await fetchJson(chrome.runtime.getURL("update.json"));
-  return hydrateMods(localUpdate.mods || [], "bundle", true);
+  return hydrateMods(localUpdate.mods || [], "github", true);
 }
 
 async function hydrateMods(modDefs, source, preferBundleFiles) {
@@ -100,7 +143,6 @@ async function hydrateMods(modDefs, source, preferBundleFiles) {
       css = raw.css;
     }
 
-    // Inline JS string in update.json (rare)
     if (!js && typeof raw.js === "string" && raw.js.includes("\n")) js = raw.js;
 
     let matches;
@@ -114,6 +156,10 @@ async function hydrateMods(modDefs, source, preferBundleFiles) {
 
     if (!js.trim() && !css.trim()) continue;
 
+    // loader = runs via content-script mod-loader (packaged player-bar scripts)
+    // remote = CSS/JS applied via content CSS injector / userScripts
+    const runViaLoader = raw.group === "builtin" || raw.runViaLoader === true || /^mods\//.test(jsPath);
+
     result.push({
       id: raw.id,
       name: String(raw.name || raw.id),
@@ -122,10 +168,10 @@ async function hydrateMods(modDefs, source, preferBundleFiles) {
       js,
       css,
       mainWorld: !!raw.mainWorld,
-      group: raw.group === "remote" ? "remote" : "builtin",
-      enabled: raw.enabledByDefault !== false,
-      enabledByDefault: raw.enabledByDefault !== false,
-      source,
+      group: runViaLoader ? "builtin" : "remote",
+      enabled: raw.enabledByDefault === true,
+      enabledByDefault: raw.enabledByDefault === true,
+      source: source === "bundle" ? "github" : source,
       updatedAt: Date.now(),
     });
   }
@@ -183,8 +229,11 @@ async function registerRunnableScripts() {
     }
   }
 
-  const data = await SAI.storageGet(["customMods", "syncedMods", "builtinEnabled"]);
-  const enabledMap = SAI.builtinEnabledMap(data.builtinEnabled);
+  const data = await SAI.storageGet(["customMods", "syncedMods", "modEnabled", "builtinEnabled"]);
+  const enabledMap = SAI.modEnabledMap(
+    SAI.mergeEnabledMaps(data.builtinEnabled, data.modEnabled),
+    data.syncedMods
+  );
   const runnable = [];
 
   for (const mod of Array.isArray(data.customMods) ? data.customMods : []) {
@@ -195,8 +244,8 @@ async function registerRunnableScripts() {
     if (mod.group === "builtin") continue;
     if (!String(mod.js || "").trim() || !mod.matches?.length) continue;
     const on = Object.prototype.hasOwnProperty.call(enabledMap, mod.id)
-      ? enabledMap[mod.id] !== false
-      : mod.enabled !== false;
+      ? enabledMap[mod.id] === true
+      : mod.enabled === true;
     if (on) runnable.push(mod);
   }
 
@@ -221,40 +270,43 @@ async function registerRunnableScripts() {
 }
 
 async function checkUpdates() {
-  await seedAndSync();
+  await seedAndSync(true);
   const urls = SAI.updateUrls();
   const localVersion = SAI.localVersion();
   const manifest = await fetchUpdateManifest(urls);
-  const previous = await SAI.storageGet(["syncedMods", "builtinEnabled"]);
-  const prevEnabled = SAI.builtinEnabledMap(previous.builtinEnabled);
+  const previous = await SAI.storageGet(["syncedMods", "builtinEnabled", "modEnabled"]);
+  const prevEnabled = SAI.modEnabledMap(
+    SAI.mergeEnabledMaps(previous.builtinEnabled, previous.modEnabled),
+    previous.syncedMods
+  );
   const prevMap = new Map((previous.syncedMods || []).map((mod) => [mod.id, mod]));
 
   let hydrated;
   try {
     hydrated = await hydrateMods(manifest.mods || [], "github", false);
   } catch (error) {
-    // Fall back to bundled files if raw fetch fails
-    hydrated = await hydrateMods(manifest.mods || [], "bundle", true);
+    hydrated = await hydrateMods(manifest.mods || [], "github", true);
     console.warn("[SAI Mods] GitHub mod fetch failed, using bundle", error);
   }
 
   const merged = hydrated.map((mod) => {
     const old = prevMap.get(mod.id);
     const enabled = Object.prototype.hasOwnProperty.call(prevEnabled, mod.id)
-      ? prevEnabled[mod.id] !== false
+      ? prevEnabled[mod.id] === true
       : old
-        ? old.enabled !== false
-        : mod.enabledByDefault !== false;
+        ? old.enabled === true
+        : mod.enabledByDefault === true;
     return { ...mod, enabled };
   });
 
   const enabledMap = { ...prevEnabled };
   for (const mod of merged) {
-    if (typeof enabledMap[mod.id] !== "boolean") enabledMap[mod.id] = mod.enabled !== false;
+    if (typeof enabledMap[mod.id] !== "boolean") enabledMap[mod.id] = mod.enabled === true;
   }
 
   await SAI.storageSet({
     syncedMods: merged,
+    modEnabled: enabledMap,
     builtinEnabled: enabledMap,
     lastUpdateCheck: {
       at: Date.now(),
@@ -304,7 +356,6 @@ async function fetchUpdateManifest(urls) {
         mods: [],
       };
     } catch {
-      // Offline / before push: use packaged update.json
       try {
         return await fetchJson(chrome.runtime.getURL("update.json"));
       } catch {

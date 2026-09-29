@@ -36,31 +36,10 @@ button { cursor: pointer; }
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: #1c1c1c;
-  border: 1px solid var(--line);
-  position: relative;
+  object-fit: cover;
+  display: block;
   flex: none;
-}
-
-.mark::before {
-  content: "";
-  position: absolute;
-  left: 7px;
-  right: 7px;
-  top: 10px;
-  height: 3px;
-  border-radius: 99px;
-  background: var(--red);
-}
-
-.mark::after {
-  content: "";
-  position: absolute;
-  left: 11px;
-  top: 17px;
-  border-style: solid;
-  border-width: 5px 0 5px 8px;
-  border-color: transparent transparent transparent #fff;
+  background: #000;
 }
 
 .top h1 {
@@ -90,8 +69,11 @@ button { cursor: pointer; }
 }
 
 .update-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin: 0 12px 14px;
-  padding: 12px;
+  padding: 14px;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -99,21 +81,57 @@ button { cursor: pointer; }
 
 .update-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.update-version {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
+.update-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
+.update-version {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ver-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.ver-pill b {
+  color: var(--text);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.ver-pill.is-new {
+  background: var(--red-dim);
+  border-color: rgba(255, 45, 58, 0.32);
+  color: #ffb4b8;
+}
+
+.ver-pill.is-new b { color: #fff; }
+
 .update-status {
-  margin: 10px 0 0;
-  padding: 8px 10px;
-  border-radius: 8px;
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 9px;
+  border: 1px solid transparent;
   font-size: 12px;
   line-height: 1.45;
   background: #222;
@@ -122,28 +140,38 @@ button { cursor: pointer; }
 
 .update-status.ok {
   background: rgba(80, 180, 120, 0.12);
+  border-color: rgba(80, 180, 120, 0.24);
   color: #b7ebc8;
 }
 
 .update-status.error {
   background: rgba(255, 45, 58, 0.12);
+  border-color: rgba(255, 45, 58, 0.28);
   color: #ffb4b8;
 }
 
 .update-status.pending {
   background: rgba(255, 255, 255, 0.04);
+  border-color: var(--line);
   color: #cfcfcf;
 }
 
 .update-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-top: 10px;
+}
+
+.update-actions .ghost {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
 }
 
 .update-hint {
-  margin: 10px 0 0;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
   color: var(--faint);
   font-size: 11px;
   line-height: 1.45;
@@ -151,8 +179,15 @@ button { cursor: pointer; }
 
 .primary.compact {
   width: auto;
-  padding: 8px 12px;
+  flex: none;
+  padding: 8px 14px;
   font-size: 13px;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+  filter: none;
 }
 
 .ghost {

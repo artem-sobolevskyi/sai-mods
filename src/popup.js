@@ -1,8 +1,7 @@
-const builtinRoot = document.querySelector("#builtin");
-const remoteRoot = document.querySelector("#remote");
+const modsRoot = document.querySelector("#mods");
+const modsEmpty = document.querySelector("#mods-empty");
 const customRoot = document.querySelector("#custom");
 const empty = document.querySelector("#empty");
-const remoteEmpty = document.querySelector("#remote-empty");
 const versionLine = document.querySelector("#version-line");
 const updateStatus = document.querySelector("#update-status");
 const updateActions = document.querySelector("#update-actions");
@@ -17,14 +16,14 @@ updateButton.addEventListener("click", runUpdate);
 downloadButton.addEventListener("click", () => openUrl(latestUrls.downloadZipUrl));
 openGithubButton.addEventListener("click", () => openUrl(latestUrls.repoUrl || latestUrls.releasesUrl));
 
-versionLine.textContent = "Installed " + SAI.localVersion();
+renderVersions();
 chrome.runtime.sendMessage({ type: "ensure-mods" }).finally(render);
 
 if (globalThis.chrome?.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, area) => {
     if (
       area === "local" &&
-      (changes.builtinEnabled || changes.customMods || changes.syncedMods || changes.lastUpdateCheck)
+      (changes.modEnabled || changes.customMods || changes.syncedMods || changes.lastUpdateCheck)
     ) {
       render();
     }
@@ -32,43 +31,31 @@ if (globalThis.chrome?.storage?.onChanged) {
 }
 
 async function render() {
-  const data = await SAI.storageGet(["builtinEnabled", "customMods", "syncedMods", "lastUpdateCheck"]);
-  const enabled = SAI.builtinEnabledMap(data.builtinEnabled);
+  const data = await SAI.storageGet(["modEnabled", "builtinEnabled", "customMods", "syncedMods", "lastUpdateCheck"]);
+  const enabled = SAI.modEnabledMap(
+    SAI.mergeEnabledMaps(data.builtinEnabled, data.modEnabled),
+    data.syncedMods
+  );
   const custom = Array.isArray(data.customMods) ? data.customMods : [];
   const synced = Array.isArray(data.syncedMods) ? data.syncedMods : [];
-  const builtins = synced.filter((mod) => mod.group !== "remote");
-  const remotes = synced.filter((mod) => mod.group === "remote");
   const last = data.lastUpdateCheck;
 
-  versionLine.textContent = last?.remoteVersion
-    ? `Installed ${SAI.localVersion()} · GitHub ${last.remoteVersion}`
-    : `Installed ${SAI.localVersion()}`;
+  renderVersions(last?.remoteVersion, last?.updateAvailable);
 
   if (last?.updateAvailable) updateActions.hidden = false;
 
-  const builtinCards = (builtins.length ? builtins : SAI.BUILTIN_MODS).map((mod) =>
-    modCard({
-      title: mod.name,
-      text: mod.description || summary(mod),
-      chips: ["GitHub", ...((mod.sites || mod.matches || []).slice(0, 2))],
-      checked: enabled[mod.id] !== false,
-      onToggle: (value) => setBuiltin(mod.id, value),
-    })
-  );
-  builtinRoot.replaceChildren(...builtinCards);
-
-  remoteRoot.replaceChildren(
-    ...remotes.map((mod) =>
+  modsRoot.replaceChildren(
+    ...synced.map((mod) =>
       modCard({
         title: mod.name,
         text: mod.description || summary(mod),
-        chips: ["GitHub", ...(mod.matches || []).slice(0, 2)],
-        checked: enabled[mod.id] !== false && mod.enabled !== false,
-        onToggle: (value) => setBuiltin(mod.id, value),
+        chips: siteChips(mod),
+        checked: enabled[mod.id] === true,
+        onToggle: (value) => setModEnabled(mod.id, value),
       })
     )
   );
-  remoteEmpty.hidden = remotes.length > 0;
+  modsEmpty.hidden = synced.length > 0;
 
   customRoot.replaceChildren(
     ...custom.map((mod) =>
@@ -84,6 +71,17 @@ async function render() {
     )
   );
   empty.hidden = custom.length > 0;
+}
+
+function siteChips(mod) {
+  const sites = (mod.matches || []).map((pattern) => {
+    try {
+      return pattern.replace(/^\*:\/\//, "").replace(/\/\*$/, "");
+    } catch {
+      return pattern;
+    }
+  });
+  return sites.slice(0, 2);
 }
 
 function summary(mod) {
@@ -145,14 +143,32 @@ function toggle(checked, onToggle) {
   return label;
 }
 
-async function setBuiltin(id, value) {
-  const data = await SAI.storageGet(["builtinEnabled", "syncedMods"]);
-  const map = SAI.builtinEnabledMap(data.builtinEnabled);
-  map[id] = value;
-  const synced = Array.isArray(data.syncedMods)
-    ? data.syncedMods.map((mod) => (mod.id === id ? { ...mod, enabled: value } : mod))
-    : [];
-  await SAI.storageSet({ builtinEnabled: map, syncedMods: synced });
+async function setModEnabled(id, value) {
+  const data = await SAI.storageGet(["modEnabled", "builtinEnabled", "syncedMods"]);
+  const synced = Array.isArray(data.syncedMods) ? data.syncedMods : [];
+  const map = SAI.modEnabledMap(
+    SAI.mergeEnabledMaps(data.builtinEnabled, data.modEnabled),
+    synced
+  );
+  map[id] = value === true;
+
+  // Only one player-bar layout at a time.
+  if (value === true && SAI.BUILTIN_IDS.includes(id)) {
+    for (const other of SAI.BUILTIN_IDS) {
+      if (other !== id) map[other] = false;
+    }
+  }
+
+  const nextSynced = synced.map((mod) => ({
+    ...mod,
+    enabled: map[mod.id] === true,
+  }));
+  await SAI.storageSet({
+    modEnabled: map,
+    builtinEnabled: map,
+    syncedMods: nextSynced,
+  });
+  await reloadMatchingTabs(nextSynced.find((mod) => mod.id === id) || { matches: ["*://music.youtube.com/*"] });
 }
 
 async function setCustomEnabled(id, value) {
@@ -162,10 +178,25 @@ async function setCustomEnabled(id, value) {
   await SAI.storageSet({ customMods: next });
 }
 
+async function reloadMatchingTabs(mod) {
+  if (!chrome.tabs?.query) return;
+  const patterns = mod?.matches?.length ? mod.matches : ["*://music.youtube.com/*"];
+  try {
+    const tabs = await chrome.tabs.query({ url: patterns });
+    await Promise.all(
+      tabs
+        .filter((tab) => typeof tab.id === "number")
+        .map((tab) => chrome.tabs.reload(tab.id).catch(() => {}))
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
 async function runUpdate() {
   updateButton.disabled = true;
   updateButton.textContent = "Updating…";
-  showUpdateStatus("Fetching configs and mods from GitHub…", "pending");
+  showUpdateStatus("Fetching configs from GitHub…", "pending");
   try {
     const result = await chrome.runtime.sendMessage({ type: "check-updates" });
     if (!result?.ok) {
@@ -176,21 +207,17 @@ async function runUpdate() {
     }
 
     latestUrls = result.urls || SAI.updateUrls();
-    const syncedLine =
-      result.remoteModsSynced === 1 ? "1 mod synced" : `${result.remoteModsSynced} mods synced`;
+    const syncedLine = result.remoteModsSynced === 1 ? "1 mod synced" : `${result.remoteModsSynced} mods synced`;
 
     if (result.updateAvailable) {
       updateActions.hidden = false;
       showUpdateStatus(
-        `Package update available: ${result.localVersion} → ${result.remoteVersion}. ${syncedLine}. Download the ZIP, replace this folder, Reload on chrome://extensions, then refresh YouTube Music.`,
+        `Package update available: ${result.localVersion} → ${result.remoteVersion}. ${syncedLine}. Download ZIP, replace the folder, Reload the extension, then refresh the site.`,
         "ok"
       );
     } else {
       updateActions.hidden = false;
-      showUpdateStatus(
-        `Configs are up to date (${result.localVersion}). ${syncedLine}. Refresh open music.youtube.com tabs to apply JS mod changes.`,
-        "ok"
-      );
+      showUpdateStatus(`Mods synced from GitHub (${result.localVersion}). ${syncedLine}.`, "ok");
     }
     await render();
   } catch (error) {
@@ -201,6 +228,23 @@ async function runUpdate() {
     updateButton.disabled = false;
     updateButton.textContent = "Update";
   }
+}
+
+function renderVersions(remoteVersion, updateAvailable) {
+  const pills = [versionPill("Installed", SAI.localVersion())];
+  if (remoteVersion) pills.push(versionPill("GitHub", remoteVersion, updateAvailable));
+  versionLine.replaceChildren(...pills);
+}
+
+function versionPill(label, value, highlight) {
+  const pill = document.createElement("span");
+  pill.className = highlight ? "ver-pill is-new" : "ver-pill";
+  const name = document.createElement("span");
+  name.textContent = label;
+  const version = document.createElement("b");
+  version.textContent = value;
+  pill.append(name, version);
+  return pill;
 }
 
 function showUpdateStatus(text, kind) {
