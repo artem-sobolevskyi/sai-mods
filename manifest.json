@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SAI Mods",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Site appearance mods synced from GitHub, with YouTube Music player bar layouts and custom CSS/JS.",
   "minimum_chrome_version": "120",
   "permissions": ["storage", "userScripts", "tabs"],

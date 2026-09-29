@@ -1,6 +1,6 @@
 {
-  "version": "1.4.3",
-  "releaseNotes": "Modern bar: timeline aligned to the top edge with a reliable click area; vertical volume popup now responds to click, drag and wheel.",
+  "version": "1.4.4",
+  "releaseNotes": "Classic bar: show track title again and fix the vertical volume popup; also works on the older player bar.",
   "mods": [
     {
       "id": "ytmusic-classic",
