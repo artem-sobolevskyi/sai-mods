@@ -18,13 +18,13 @@ downloadButton.addEventListener("click", () => openUrl(latestUrls.downloadZipUrl
 openGithubButton.addEventListener("click", () => openUrl(latestUrls.repoUrl || latestUrls.releasesUrl));
 
 versionLine.textContent = "Installed " + SAI.localVersion();
-render();
+chrome.runtime.sendMessage({ type: "ensure-mods" }).finally(render);
 
 if (globalThis.chrome?.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, area) => {
     if (
       area === "local" &&
-      (changes.builtinEnabled || changes.customMods || changes.remoteMods || changes.lastUpdateCheck)
+      (changes.builtinEnabled || changes.customMods || changes.syncedMods || changes.lastUpdateCheck)
     ) {
       render();
     }
@@ -32,44 +32,43 @@ if (globalThis.chrome?.storage?.onChanged) {
 }
 
 async function render() {
-  const data = await SAI.storageGet(["builtinEnabled", "customMods", "remoteMods", "lastUpdateCheck"]);
+  const data = await SAI.storageGet(["builtinEnabled", "customMods", "syncedMods", "lastUpdateCheck"]);
   const enabled = SAI.builtinEnabledMap(data.builtinEnabled);
   const custom = Array.isArray(data.customMods) ? data.customMods : [];
-  const remote = Array.isArray(data.remoteMods) ? data.remoteMods : [];
+  const synced = Array.isArray(data.syncedMods) ? data.syncedMods : [];
+  const builtins = synced.filter((mod) => mod.group !== "remote");
+  const remotes = synced.filter((mod) => mod.group === "remote");
   const last = data.lastUpdateCheck;
 
   versionLine.textContent = last?.remoteVersion
     ? `Installed ${SAI.localVersion()} · GitHub ${last.remoteVersion}`
     : `Installed ${SAI.localVersion()}`;
 
-  if (last?.updateAvailable) {
-    updateActions.hidden = false;
-  }
+  if (last?.updateAvailable) updateActions.hidden = false;
 
-  builtinRoot.replaceChildren(
-    ...SAI.BUILTIN_MODS.map((mod) =>
-      modCard({
-        title: mod.name,
-        text: mod.description,
-        chips: mod.sites,
-        checked: enabled[mod.id] !== false,
-        onToggle: (value) => setBuiltin(mod.id, value),
-      })
-    )
+  const builtinCards = (builtins.length ? builtins : SAI.BUILTIN_MODS).map((mod) =>
+    modCard({
+      title: mod.name,
+      text: mod.description || summary(mod),
+      chips: ["GitHub", ...((mod.sites || mod.matches || []).slice(0, 2))],
+      checked: enabled[mod.id] !== false,
+      onToggle: (value) => setBuiltin(mod.id, value),
+    })
   );
+  builtinRoot.replaceChildren(...builtinCards);
 
   remoteRoot.replaceChildren(
-    ...remote.map((mod) =>
+    ...remotes.map((mod) =>
       modCard({
         title: mod.name,
         text: mod.description || summary(mod),
         chips: ["GitHub", ...(mod.matches || []).slice(0, 2)],
-        checked: !!mod.enabled,
-        onToggle: (value) => setRemoteEnabled(mod.id, value),
+        checked: enabled[mod.id] !== false && mod.enabled !== false,
+        onToggle: (value) => setBuiltin(mod.id, value),
       })
     )
   );
-  remoteEmpty.hidden = remote.length > 0;
+  remoteEmpty.hidden = remotes.length > 0;
 
   customRoot.replaceChildren(
     ...custom.map((mod) =>
@@ -147,10 +146,13 @@ function toggle(checked, onToggle) {
 }
 
 async function setBuiltin(id, value) {
-  const data = await SAI.storageGet("builtinEnabled");
+  const data = await SAI.storageGet(["builtinEnabled", "syncedMods"]);
   const map = SAI.builtinEnabledMap(data.builtinEnabled);
   map[id] = value;
-  await SAI.storageSet({ builtinEnabled: map });
+  const synced = Array.isArray(data.syncedMods)
+    ? data.syncedMods.map((mod) => (mod.id === id ? { ...mod, enabled: value } : mod))
+    : [];
+  await SAI.storageSet({ builtinEnabled: map, syncedMods: synced });
 }
 
 async function setCustomEnabled(id, value) {
@@ -160,17 +162,10 @@ async function setCustomEnabled(id, value) {
   await SAI.storageSet({ customMods: next });
 }
 
-async function setRemoteEnabled(id, value) {
-  const data = await SAI.storageGet("remoteMods");
-  const mods = Array.isArray(data.remoteMods) ? data.remoteMods : [];
-  const next = mods.map((mod) => (mod.id === id ? { ...mod, enabled: value } : mod));
-  await SAI.storageSet({ remoteMods: next });
-}
-
 async function runUpdate() {
   updateButton.disabled = true;
   updateButton.textContent = "Updating…";
-  showUpdateStatus("Checking GitHub and syncing remote mods…", "pending");
+  showUpdateStatus("Fetching configs and mods from GitHub…", "pending");
   try {
     const result = await chrome.runtime.sendMessage({ type: "check-updates" });
     if (!result?.ok) {
@@ -181,21 +176,19 @@ async function runUpdate() {
     }
 
     latestUrls = result.urls || SAI.updateUrls();
-    const remoteLine =
-      result.remoteModsSynced === 1
-        ? "1 remote mod synced"
-        : `${result.remoteModsSynced} remote mods synced`;
+    const syncedLine =
+      result.remoteModsSynced === 1 ? "1 mod synced" : `${result.remoteModsSynced} mods synced`;
 
     if (result.updateAvailable) {
       updateActions.hidden = false;
       showUpdateStatus(
-        `Update available: ${result.localVersion} → ${result.remoteVersion}. ${remoteLine}. Download the ZIP, replace this folder, then Reload on chrome://extensions.`,
+        `Package update available: ${result.localVersion} → ${result.remoteVersion}. ${syncedLine}. Download the ZIP, replace this folder, Reload on chrome://extensions, then refresh YouTube Music.`,
         "ok"
       );
     } else {
       updateActions.hidden = false;
       showUpdateStatus(
-        `You are on the latest package (${result.localVersion}). ${remoteLine}.`,
+        `Configs are up to date (${result.localVersion}). ${syncedLine}. Refresh open music.youtube.com tabs to apply JS mod changes.`,
         "ok"
       );
     }

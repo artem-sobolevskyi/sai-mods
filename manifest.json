@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SAI Mods",
-  "version": "1.2.0",
-  "description": "Site appearance mods with GitHub updates, remote mods, and YouTube Music player bar layouts.",
+  "version": "1.3.0",
+  "description": "Site appearance mods synced from GitHub, with YouTube Music player bar layouts and custom CSS/JS.",
   "minimum_chrome_version": "120",
   "permissions": ["storage", "userScripts"],
   "host_permissions": ["<all_urls>"],
@@ -32,8 +32,14 @@
     },
     {
       "matches": ["*://music.youtube.com/*"],
-      "js": ["src/content/ytmusic-classic.js", "src/content/ytmusic-modern.js"],
+      "js": ["src/shared.js", "src/content/mod-loader.js"],
       "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["update.json", "mods/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

@@ -21,14 +21,23 @@ Optional: for custom JavaScript mods, open the extension details and turn on **A
 
 ## Updates
 
-In the extension popup:
+In the extension popup click **Update**. That:
 
-1. Click **Update**.
-2. The extension fetches [`update.json`](./update.json) from this repository.
-3. Remote mods are synced into a separate list (your enable/disable choices are kept).
-4. If the GitHub version is newer than your installed `manifest.json` version, use **Download ZIP** or **Open GitHub**, replace the extension files, then click **Reload** on `chrome://extensions`.
+1. Fetches [`update.json`](./update.json) from GitHub
+2. Downloads every listed mod script under [`mods/`](./mods/) (classic bar, modern bar, and extras)
+3. Saves them into extension storage so pages pick them up after a tab refresh
+4. If the GitHub package version is newer than your installed `manifest.json`, offers **Download ZIP** / **Open GitHub**
 
-Chrome cannot overwrite an unpacked extension’s files from inside the extension. The Update button checks, syncs remote mods, and points you at the latest package.
+Chrome cannot overwrite an unpacked extension folder by itself. Config/mod code syncs live from GitHub; a newer extension shell still needs a manual ZIP replace + Reload on `chrome://extensions`.
+
+## Mod files
+
+Built-in layouts live in:
+
+- `mods/ytmusic-classic.js`
+- `mods/ytmusic-modern.js`
+
+Edit those files, bump `version` in both `manifest.json` and `update.json`, push to `main`, then press **Update** in the popup.
 
 ## Create a custom mod
 

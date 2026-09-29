@@ -45,26 +45,79 @@
 
     html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar {
       position: absolute !important;
-      top: 0 !important;
+      top: -2px !important;
       left: 0 !important;
       right: 0 !important;
-      width: auto !important;
-      height: 12px !important;
+      width: 100% !important;
+      height: 20px !important;
       margin: 0 !important;
-      z-index: 6 !important;
-      --paper-slider-container-color: transparent;
+      padding: 0 !important;
+      z-index: 20 !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      --paper-slider-container-color: rgba(255, 255, 255, 0.28);
+      --paper-slider-active-color: #ff0033;
+      --paper-slider-secondary-color: rgba(255, 255, 255, 0.4);
+      --paper-slider-knob-color: #ff0033;
+      --paper-slider-knob-start-color: #ff0033;
+      --paper-slider-knob-start-border-color: #ff0033;
+      --paper-progress-container-color: rgba(255, 255, 255, 0.28);
+      --paper-progress-active-color: #ff0033;
+      --paper-progress-secondary-color: rgba(255, 255, 255, 0.4);
     }
 
     html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #sliderContainer,
     html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar .bar-container {
+      height: 20px !important;
       margin: 0 !important;
-      height: 3px !important;
+      opacity: 1 !important;
     }
 
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar:hover #sliderContainer,
-    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar:hover .bar-container,
     html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #sliderBar {
+      height: 3px !important;
+      margin: 8.5px 0 !important;
+      opacity: 1 !important;
+    }
+
+    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #progressContainer {
+      height: 3px !important;
+      min-height: 3px !important;
+      background: rgba(255, 255, 255, 0.28) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar:hover #sliderBar,
+    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar:hover #progressContainer {
       height: 4px !important;
+    }
+
+    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #primaryProgress {
+      background: linear-gradient(90deg, #ff0033 80%, #ff2791) !important;
+      background-color: #ff0033 !important;
+      height: 100% !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #secondaryProgress {
+      background: rgba(255, 255, 255, 0.4) !important;
+      height: 100% !important;
+      opacity: 1 !important;
+    }
+
+    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar .slider-knob-inner {
+      background: #ff0033 !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      width: 12px !important;
+      height: 12px !important;
+      z-index: 21 !important;
+    }
+
+    html.sai-ytm-modern ytmusic-player-bar.sai-modern-on #progress-bar #sliderKnob {
+      z-index: 21 !important;
+      margin-top: 0 !important;
     }
 
     html.sai-ytm-modern .sai-modern-row {
@@ -224,27 +277,69 @@
     html.sai-ytm-modern .sai-volume-wrap #volume-slider {
       position: absolute !important;
       left: 50% !important;
-      bottom: calc(100% + 10px) !important;
-      transform: translateX(-50%) rotate(-90deg);
-      transform-origin: center center;
-      width: 88px !important;
-      height: 28px !important;
+      bottom: calc(100% + 12px) !important;
+      transform: translateX(-50%) rotate(-90deg) !important;
+      transform-origin: center center !important;
+      width: 108px !important;
+      height: 32px !important;
       margin: 0 !important;
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0 !important;
+      pointer-events: none !important;
       transition: opacity 0.12s ease;
-      z-index: 40 !important;
-      background: rgba(40, 40, 40, 0.96);
-      border-radius: 8px;
-      padding: 0 6px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      z-index: 50 !important;
+      background: rgb(48, 48, 48) !important;
+      border-radius: 16px !important;
+      padding: 0 10px !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+      overflow: visible !important;
+      --paper-slider-container-color: #c8c8c8;
+      --paper-progress-container-color: #c8c8c8;
+      --paper-slider-active-color: #ffffff;
+      --paper-progress-active-color: #ffffff;
+      --paper-slider-knob-color: #ffffff;
+      --paper-slider-knob-start-color: #ffffff;
+      --paper-slider-knob-start-border-color: #ffffff;
     }
 
     html.sai-ytm-modern .sai-volume-wrap:hover #volume-slider,
     html.sai-ytm-modern .sai-volume-wrap:focus-within #volume-slider,
     html.sai-ytm-modern .sai-volume-wrap.sai-volume-open #volume-slider {
-      opacity: 1;
-      pointer-events: auto;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+
+    html.sai-ytm-modern .sai-volume-wrap #volume-slider #sliderContainer,
+    html.sai-ytm-modern .sai-volume-wrap #volume-slider .bar-container {
+      height: 32px !important;
+      opacity: 1 !important;
+    }
+
+    html.sai-ytm-modern .sai-volume-wrap #volume-slider #sliderBar {
+      height: 4px !important;
+      margin: 14px 0 !important;
+      opacity: 1 !important;
+    }
+
+    html.sai-ytm-modern .sai-volume-wrap #volume-slider #progressContainer {
+      height: 4px !important;
+      min-height: 4px !important;
+      background: #c8c8c8 !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    html.sai-ytm-modern .sai-volume-wrap #volume-slider #primaryProgress {
+      background: #ffffff !important;
+      height: 100% !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    html.sai-ytm-modern .sai-volume-wrap #volume-slider .slider-knob-inner {
+      background: #ffffff !important;
+      border: 0 !important;
+      width: 12px !important;
+      height: 12px !important;
     }
 
     html.sai-ytm-modern .sai-modern-on [hidden] {
@@ -254,7 +349,18 @@
     html.sai-ytm-modern .sai-modern-on .expand-button,
     html.sai-ytm-modern .sai-modern-on .toggle-player-page-button,
     html.sai-ytm-modern .sai-modern-on .exit-fullscreen-button,
-    html.sai-ytm-modern .sai-modern-on ytmusic-player-expanding-menu {
+    html.sai-ytm-modern .sai-modern-on ytmusic-player-expanding-menu,
+    html.sai-ytm-modern .sai-modern-on #expand-repeat,
+    html.sai-ytm-modern .sai-modern-on #expand-shuffle,
+    html.sai-ytm-modern .sai-modern-on #expand-volume,
+    html.sai-ytm-modern .sai-modern-on #expand-volume-slider {
+      display: none !important;
+    }
+
+    html.sai-ytm-modern .sai-modern-middle > .rewind-button[hidden],
+    html.sai-ytm-modern .sai-modern-middle > yt-icon-button[hidden],
+    html.sai-ytm-modern .sai-modern-middle > .spinner-container[hidden],
+    html.sai-ytm-modern .sai-modern-middle > ytmusic-playback-rate-renderer[hidden] {
       display: none !important;
     }
   `;
@@ -462,35 +568,35 @@
     const columns = ensureColumns(bar);
     const thumb = bar.querySelector(".thumbnail-image-wrapper");
     const content = bar.querySelector(".content-info-wrapper");
-    const shuffle = bar.querySelector(".shuffle");
+    const shuffle =
+      bar.querySelector(".right-controls-buttons > .shuffle") ||
+      bar.querySelector(".sai-modern-middle > .shuffle:not(#expand-shuffle)") ||
+      bar.querySelector(".shuffle:not(#expand-shuffle)");
     const rate = bar.querySelector("ytmusic-playback-rate-renderer");
     const rewind = bar.querySelector(".rewind-button");
     const previous = bar.querySelector(".previous-button");
     const play = bar.querySelector("#play-pause-button");
     const spinner = bar.querySelector(".spinner-container");
     const next = bar.querySelector(".next-button");
-    const repeat = bar.querySelector(".repeat");
+    const repeat =
+      bar.querySelector(".right-controls-buttons > .repeat") ||
+      bar.querySelector(".sai-modern-middle > .repeat:not(#expand-repeat)") ||
+      [...bar.querySelectorAll("yt-icon-button.repeat")].find((el) => el.id !== "expand-repeat");
     const time = bar.querySelector(".time-info");
     const likes = bar.querySelector("#like-button-renderer") || bar.querySelector("ytmusic-like-button-renderer");
     const menu = bar.querySelector("ytmusic-menu-renderer.menu") || bar.querySelector(".middle-controls-buttons ytmusic-menu-renderer");
-    const volumeBtn = bar.querySelector(".volume");
-    const volumeSlider = bar.querySelector("#volume-slider");
+    const volumeBtn = bar.querySelector(".right-controls-buttons > .volume") || bar.querySelector(".volume:not(#expand-volume)");
+    const volumeSlider = bar.querySelector("#volume-slider:not(#expand-volume-slider)");
 
     const seekForward =
       bar.querySelector(
-        ".left-controls-buttons yt-icon-button[aria-label*='30'], .left-controls-buttons yt-icon-button[title*='30']"
-      ) ||
-      [...(bar.querySelectorAll(".left-controls-buttons > yt-icon-button") || [])].find(
-        (el) =>
-          !el.classList.contains("previous-button") &&
-          !el.classList.contains("rewind-button") &&
-          !el.classList.contains("play-pause-button") &&
-          !el.classList.contains("next-button") &&
-          el !== play
-      );
+        ".left-controls-buttons > yt-icon-button[aria-label*='30'], .left-controls-buttons > yt-icon-button[title*='30']"
+      ) || null;
 
     placeSequence(columns.left, [thumb, content]);
     placeSequence(columns.middle, [shuffle, rate, rewind, previous, play, spinner, seekForward, next, repeat]);
+    dedupeMiddleControls(columns.middle, { shuffle, repeat });
+    styleProgressBar(bar);
     placeSequence(columns.right, [time, likes]);
     const wrap = ensureVolumeWrap(columns.right, volumeBtn, volumeSlider);
     if (menu) {
@@ -503,6 +609,112 @@
       }
     }
     vacate(bar);
+  }
+
+  function dedupeMiddleControls(middle, keep) {
+    if (!middle) return;
+    middle.querySelectorAll(".repeat, #expand-repeat").forEach((el) => {
+      if (el.id === "expand-repeat" || (keep.repeat && el !== keep.repeat)) {
+        el.style.setProperty("display", "none", "important");
+      }
+    });
+    middle.querySelectorAll(".shuffle, #expand-shuffle").forEach((el) => {
+      if (el.id === "expand-shuffle" || (keep.shuffle && el !== keep.shuffle)) {
+        el.style.setProperty("display", "none", "important");
+      }
+    });
+  }
+
+  function styleProgressBar(bar) {
+    const progress = bar.querySelector("#progress-bar");
+    if (!progress) return;
+
+    const cssText = `
+      #sliderContainer, .bar-container { height: 20px !important; opacity: 1 !important; }
+      #sliderBar { height: 3px !important; margin: 8.5px 0 !important; opacity: 1 !important; }
+      #progressContainer {
+        height: 3px !important;
+        min-height: 3px !important;
+        background: rgba(255, 255, 255, 0.28) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      #primaryProgress {
+        background: linear-gradient(90deg, #ff0033 80%, #ff2791) !important;
+        height: 100% !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      #secondaryProgress {
+        background: rgba(255, 255, 255, 0.4) !important;
+        height: 100% !important;
+        opacity: 1 !important;
+      }
+      .slider-knob-inner {
+        background: #ff0033 !important;
+        border: 0 !important;
+        width: 12px !important;
+        height: 12px !important;
+      }
+    `;
+
+    const targets = [progress];
+    if (progress.shadowRoot) targets.push(progress.shadowRoot);
+    progress.querySelectorAll("*").forEach((el) => {
+      if (el.shadowRoot) targets.push(el.shadowRoot);
+    });
+
+    targets.forEach((root) => {
+      if (!root.querySelector) return;
+      let style = root.querySelector("#sai-progress-fix");
+      if (!style) {
+        style = document.createElement("style");
+        style.id = "sai-progress-fix";
+        root.appendChild(style);
+      }
+      style.textContent = cssText;
+    });
+
+    const vol = bar.querySelector(".sai-volume-wrap #volume-slider");
+    if (!vol) return;
+    const volCss = `
+      #sliderContainer, .bar-container { height: 32px !important; opacity: 1 !important; }
+      #sliderBar { height: 4px !important; margin: 14px 0 !important; opacity: 1 !important; }
+      #progressContainer {
+        height: 4px !important;
+        min-height: 4px !important;
+        background: #c8c8c8 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      #primaryProgress {
+        background: #ffffff !important;
+        height: 100% !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      .slider-knob-inner {
+        background: #ffffff !important;
+        border: 0 !important;
+        width: 12px !important;
+        height: 12px !important;
+      }
+    `;
+    const volTargets = [vol];
+    if (vol.shadowRoot) volTargets.push(vol.shadowRoot);
+    vol.querySelectorAll("*").forEach((el) => {
+      if (el.shadowRoot) volTargets.push(el.shadowRoot);
+    });
+    volTargets.forEach((root) => {
+      if (!root.querySelector) return;
+      let style = root.querySelector("#sai-volume-fix");
+      if (!style) {
+        style = document.createElement("style");
+        style.id = "sai-volume-fix";
+        root.appendChild(style);
+      }
+      style.textContent = volCss;
+    });
   }
 
   function restore() {

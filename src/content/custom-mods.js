@@ -1,13 +1,21 @@
 (() => {
   function collectMods(data) {
-    return [
-      ...(Array.isArray(data.customMods) ? data.customMods : []),
-      ...(Array.isArray(data.remoteMods) ? data.remoteMods : []),
-    ];
+    const enabledMap = data.builtinEnabled && typeof data.builtinEnabled === "object" ? data.builtinEnabled : {};
+    const synced = Array.isArray(data.syncedMods) ? data.syncedMods : [];
+    const custom = Array.isArray(data.customMods) ? data.customMods : [];
+
+    const fromSynced = synced.map((mod) => {
+      const enabled = Object.prototype.hasOwnProperty.call(enabledMap, mod.id)
+        ? enabledMap[mod.id] !== false
+        : mod.enabled !== false;
+      return { ...mod, enabled };
+    });
+
+    return [...fromSynced, ...custom];
   }
 
   function apply() {
-    chrome.storage.local.get(["customMods", "remoteMods"], (data) => {
+    chrome.storage.local.get(["customMods", "syncedMods", "builtinEnabled"], (data) => {
       const mods = collectMods(data);
       const active = new Set();
 
@@ -36,6 +44,6 @@
 
   apply();
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && (changes.customMods || changes.remoteMods)) apply();
+    if (area === "local" && (changes.customMods || changes.syncedMods || changes.builtinEnabled)) apply();
   });
 })();

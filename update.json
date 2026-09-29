@@ -1,15 +1,35 @@
 {
-  "version": "1.2.0",
-  "releaseNotes": "Update checks from GitHub, remote mod sync, modern player bar pinned to the bottom, classic and modern YouTube Music layouts.",
-  "remoteMods": [
+  "version": "1.3.0",
+  "releaseNotes": "All mods sync from GitHub. Fixed modern timeline track and light-gray vertical volume slider.",
+  "mods": [
+    {
+      "id": "ytmusic-classic",
+      "name": "Classic YouTube Music player bar",
+      "description": "For the new miniplayer. Controls on the left, the track in the center, volume on the right — like the old bar. Keeps the new volume popup above the button.",
+      "matches": ["*://music.youtube.com/*"],
+      "js": "mods/ytmusic-classic.js",
+      "css": "",
+      "group": "builtin",
+      "enabledByDefault": true
+    },
+    {
+      "id": "ytmusic-modern",
+      "name": "Modern YouTube Music player bar",
+      "description": "For the old player bar. Track on the left, playback controls in the center, time and actions on the right — like the new miniplayer. Volume opens above the button.",
+      "matches": ["*://music.youtube.com/*"],
+      "js": "mods/ytmusic-modern.js",
+      "css": "",
+      "group": "builtin",
+      "enabledByDefault": true
+    },
     {
       "id": "remote-ytm-hide-upsell",
       "name": "YouTube Music: quieter chrome",
       "description": "Softens a few promotional chips on music.youtube.com. Fetched from GitHub so it can change without reinstalling the extension.",
       "matches": ["*://music.youtube.com/*"],
-      "css": "ytmusic-mealbar-promo-renderer,\nytmusic-popup-container tp-yt-paper-dialog.ytmusic-mealbar-promo-renderer {\n  display: none !important;\n}\n",
       "js": "",
-      "mainWorld": false,
+      "css": "ytmusic-mealbar-promo-renderer,\nytmusic-popup-container tp-yt-paper-dialog.ytmusic-mealbar-promo-renderer {\n  display: none !important;\n}\n",
+      "group": "remote",
       "enabledByDefault": false
     }
   ]

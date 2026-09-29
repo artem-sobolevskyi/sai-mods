@@ -15,6 +15,7 @@ SAI.updateUrls = function updateUrls() {
     releasesUrl: `https://github.com/${owner}/${repo}/releases`,
     downloadZipUrl: `https://github.com/${owner}/${repo}/archive/refs/heads/${branch}.zip`,
     manifestUrl: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/update.json?_=${Date.now()}`,
+    rawBase: `https://raw.githubusercontent.com/${owner}/${repo}/${branch}`,
     apiLatestRelease: `https://api.github.com/repos/${owner}/${repo}/releases/latest`,
     apiRepo: `https://api.github.com/repos/${owner}/${repo}`,
   };
@@ -179,6 +180,12 @@ SAI.builtinEnabledMap = function builtinEnabledMap(stored) {
     if (typeof map[id] !== "boolean") map[id] = true;
   }
   return map;
+};
+
+SAI.modsFromSynced = function modsFromSynced(syncedMods, group) {
+  return (Array.isArray(syncedMods) ? syncedMods : []).filter((mod) =>
+    group ? mod.group === group : true
+  );
 };
 
 SAI.normalizeRemoteMod = function normalizeRemoteMod(raw) {
