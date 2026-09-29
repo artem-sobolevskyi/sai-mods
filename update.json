@@ -1,6 +1,6 @@
 {
-  "version": "1.4.6",
-  "releaseNotes": "Restore classic/modern as packaged content scripts so they apply again. Classic title and volume fixes included.",
+  "version": "1.4.7",
+  "releaseNotes": "Keep the classic player bar fixed at the bottom instead of sitting in page flow.",
   "mods": [
     {
       "id": "ytmusic-classic",

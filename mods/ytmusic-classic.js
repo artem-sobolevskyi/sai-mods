@@ -127,9 +127,38 @@
       box-sizing: border-box !important;
     }
 
+    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on ~ #player-bar-background,
+    html.sai-ytm-classic #player-bar-background {
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      top: auto !important;
+      width: 100% !important;
+      height: 72px !important;
+      max-height: 72px !important;
+      z-index: 4 !important;
+      transform: none !important;
+    }
+
     html.sai-ytm-classic ytmusic-player-bar.sai-classic-on {
-      position: relative !important;
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      top: auto !important;
+      inset: auto 0 0 0 !important;
+      width: 100% !important;
+      height: 72px !important;
+      min-height: 72px !important;
+      max-height: 72px !important;
+      z-index: 5 !important;
+      transform: none !important;
+      display: block !important;
+      box-sizing: border-box !important;
       overflow: visible !important;
+      margin: 0 !important;
+      background: rgb(33, 33, 33) !important;
     }
 
     :host-context(html.sai-ytm-classic) .ytMusicMiniPlayerProgressBarWrapper,
@@ -169,10 +198,15 @@
 
     html.sai-ytm-classic ytmusic-player-bar.sai-classic-on > .sai-classic-row {
       position: absolute !important;
-      inset: 0 !important;
-      height: 100% !important;
+      left: 0 !important;
+      right: 0 !important;
+      top: 0 !important;
+      bottom: auto !important;
+      height: 72px !important;
       padding: 0 12px !important;
       z-index: 20 !important;
+      margin: 0 !important;
+      transform: none !important;
     }
 
     :host-context(html.sai-ytm-classic) .sai-left,
