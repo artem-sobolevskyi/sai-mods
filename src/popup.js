@@ -168,6 +168,16 @@ async function setModEnabled(id, value) {
     builtinEnabled: map,
     syncedMods: nextSynced,
   });
+
+  const sync = await chrome.runtime.sendMessage({ type: "sync-user-scripts" }).catch(() => null);
+  if (value === true && sync?.needsPermission) {
+    showUpdateStatus(sync.message || "Turn on Allow user scripts for SAI Mods.", "error");
+    updateActions.hidden = false;
+  } else if (value === true && sync?.errors?.length) {
+    showUpdateStatus(sync.errors.map((item) => item.message).join(" "), "error");
+    updateActions.hidden = false;
+  }
+
   await reloadMatchingTabs(nextSynced.find((mod) => mod.id === id) || { matches: ["*://music.youtube.com/*"] });
 }
 
@@ -212,13 +222,15 @@ async function runUpdate() {
     if (result.updateAvailable) {
       updateActions.hidden = false;
       showUpdateStatus(
-        `Package update available: ${result.localVersion} → ${result.remoteVersion}. ${syncedLine}. Download ZIP, replace the folder, Reload the extension, then refresh the site.`,
+        `Mods synced (${syncedLine}). Extension package ${result.localVersion} → ${result.remoteVersion} is optional — Download ZIP only if the popup/loader itself changed.`,
         "ok"
       );
     } else {
       updateActions.hidden = false;
       showUpdateStatus(`Mods synced from GitHub (${result.localVersion}). ${syncedLine}.`, "ok");
     }
+    await chrome.runtime.sendMessage({ type: "sync-user-scripts" }).catch(() => null);
+    await reloadMatchingTabs({ matches: ["*://music.youtube.com/*"] });
     await render();
   } catch (error) {
     showUpdateStatus(error?.message || String(error), "error");

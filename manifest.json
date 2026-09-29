@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SAI Mods",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "Site appearance mods synced from GitHub, with YouTube Music player bar layouts and custom CSS/JS.",
   "minimum_chrome_version": "120",
   "permissions": ["storage", "userScripts", "tabs"],
@@ -32,12 +32,7 @@
     },
     {
       "matches": ["*://music.youtube.com/*"],
-      "js": [
-        "src/shared.js",
-        "mods/ytmusic-classic.js",
-        "mods/ytmusic-modern.js",
-        "src/content/mod-loader.js"
-      ],
+      "js": ["src/shared.js", "src/content/mod-loader.js"],
       "run_at": "document_start"
     }
   ],

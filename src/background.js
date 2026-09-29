@@ -220,7 +220,12 @@ async function registerRunnableScripts() {
 
   const ours = existing
     .map((script) => script.id)
-    .filter((id) => id.startsWith("custom-") || id.startsWith("remote-"));
+    .filter(
+      (id) =>
+        id.startsWith("custom-") ||
+        id.startsWith("remote-") ||
+        SAI.BUILTIN_IDS.includes(id)
+    );
   if (ours.length) {
     try {
       await chrome.userScripts.unregister({ ids: ours });
@@ -241,7 +246,6 @@ async function registerRunnableScripts() {
   }
 
   for (const mod of Array.isArray(data.syncedMods) ? data.syncedMods : []) {
-    if (mod.group === "builtin") continue;
     if (!String(mod.js || "").trim() || !mod.matches?.length) continue;
     const on = Object.prototype.hasOwnProperty.call(enabledMap, mod.id)
       ? enabledMap[mod.id] === true
@@ -252,12 +256,13 @@ async function registerRunnableScripts() {
   const errors = [];
   for (const mod of runnable) {
     try {
+      const isBuiltin = SAI.BUILTIN_IDS.includes(mod.id) || mod.group === "builtin";
       await chrome.userScripts.register([
         {
           id: mod.id,
           matches: mod.matches,
-          js: [{ code: wrapUserCode(mod.js) }],
-          runAt: "document_end",
+          js: [{ code: isBuiltin ? wrapBuiltinMod(mod.id, mod.js) : wrapUserCode(mod.js) }],
+          runAt: isBuiltin ? "document_start" : "document_end",
           world: mod.mainWorld ? "MAIN" : "USER_SCRIPT",
         },
       ]);
@@ -266,7 +271,12 @@ async function registerRunnableScripts() {
     }
   }
 
-  return { ok: errors.length === 0, needsPermission: false, errors };
+  return {
+    ok: errors.length === 0,
+    needsPermission: false,
+    errors,
+    registered: runnable.map((mod) => mod.id),
+  };
 }
 
 async function checkUpdates() {
@@ -369,6 +379,52 @@ function wrapUserCode(code) {
   return "'use strict';\ntry {\n" + code + "\n} catch (error) {\n  console.error('[SAI Mods]', error);\n}\n";
 }
 
+// User scripts cannot call chrome.storage, so player-bar mods get a tiny stub that
+// reports the mod as enabled. Toggle/Update re-register scripts and reload the tab.
+function wrapBuiltinMod(modId, code) {
+  const id = JSON.stringify(String(modId || ""));
+  return (
+    "'use strict';\n" +
+    "(function () {\n" +
+    "  try {\n" +
+    "    var id = " +
+    id +
+    ";\n" +
+    "    var api = globalThis.chrome || {};\n" +
+    "    if (!api.storage || !api.storage.local || !api.storage.onChanged) {\n" +
+    "      var enabled = {};\n" +
+    "      enabled[id] = true;\n" +
+    "      var state = { modEnabled: enabled, builtinEnabled: Object.assign({}, enabled) };\n" +
+    "      api.storage = {\n" +
+    "        local: {\n" +
+    "          get: function (keys, cb) {\n" +
+    "            var out = {};\n" +
+    "            if (!keys) out = Object.assign({}, state);\n" +
+    "            else if (Array.isArray(keys)) keys.forEach(function (key) { out[key] = state[key]; });\n" +
+    "            else if (typeof keys === 'string') out[keys] = state[keys];\n" +
+    "            else Object.keys(keys).forEach(function (key) { out[key] = state[key]; });\n" +
+    "            if (cb) cb(out);\n" +
+    "            return Promise.resolve(out);\n" +
+    "          },\n" +
+    "          set: function (value, cb) {\n" +
+    "            Object.keys(value || {}).forEach(function (key) { state[key] = value[key]; });\n" +
+    "            if (cb) cb();\n" +
+    "            return Promise.resolve();\n" +
+    "          }\n" +
+    "        },\n" +
+    "        onChanged: { addListener: function () {} }\n" +
+    "      };\n" +
+    "      globalThis.chrome = api;\n" +
+    "    }\n" +
+    code +
+    "\n" +
+    "  } catch (error) {\n" +
+    "    console.error('[SAI Mods]', error);\n" +
+    "  }\n" +
+    "})();\n"
+  );
+}
+
 function permissionMessage() {
-  return "To run pasted JavaScript, open chrome://extensions, find SAI Mods, and turn on Allow user scripts. CSS works without that permission.";
+  return "Turn on Allow user scripts for SAI Mods at chrome://extensions. Player-bar layouts and custom JavaScript need it so Update can load code from GitHub.";
 }
