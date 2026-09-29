@@ -1,6 +1,6 @@
 {
-  "version": "1.4.5",
-  "releaseNotes": "Classic bar title and volume fixes. Player-bar mods now load from the GitHub sync so Update applies them.",
+  "version": "1.4.6",
+  "releaseNotes": "Restore classic/modern as packaged content scripts so they apply again. Classic title and volume fixes included.",
   "mods": [
     {
       "id": "ytmusic-classic",
