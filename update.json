@@ -1,6 +1,6 @@
 {
-  "version": "1.4.8",
-  "releaseNotes": "Player-bar mods load from GitHub via Update (userScripts). Classic stays pinned to the bottom.",
+  "version": "1.4.9",
+  "releaseNotes": "Player-bar mods start from the GitHub sync even when user-script storage cannot see the toggle.",
   "mods": [
     {
       "id": "ytmusic-classic",

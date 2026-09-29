@@ -18,6 +18,15 @@ openGithubButton.addEventListener("click", () => openUrl(latestUrls.repoUrl || l
 
 renderVersions();
 chrome.runtime.sendMessage({ type: "ensure-mods" }).finally(render);
+chrome.runtime.sendMessage({ type: "sync-user-scripts" }).then((sync) => {
+  if (sync?.needsPermission) {
+    showUpdateStatus(sync.message || "Turn on Allow user scripts for SAI Mods.", "error");
+    updateActions.hidden = false;
+  } else if (sync?.errors?.length) {
+    showUpdateStatus(sync.errors.map((item) => `${item.name || item.id}: ${item.message}`).join(" "), "error");
+    updateActions.hidden = false;
+  }
+}).catch(() => {});
 
 if (globalThis.chrome?.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, area) => {

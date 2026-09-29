@@ -448,16 +448,31 @@
 
   function boot() {
     injectStyle(document.head || document.documentElement);
+    if (globalThis.__SAI_FORCE_ENABLED === MOD_ID) {
+      applyEnabled(true);
+      return;
+    }
     const storage = globalThis.chrome?.storage?.local;
-    if (!storage) return;
+    if (!storage?.get) {
+      applyEnabled(true);
+      return;
+    }
     storage.get(["modEnabled", "builtinEnabled"], (data) => {
-      applyEnabled(readEnabled(data));
+      const stored = data || {};
+      if (readEnabled(stored)) {
+        applyEnabled(true);
+        return;
+      }
+      const map = Object.assign({}, stored.builtinEnabled, stored.modEnabled);
+      // User scripts cannot see the extension toggle. An empty map means
+      // this file was injected because the layout is already enabled.
+      applyEnabled(typeof map[MOD_ID] !== "boolean");
     });
-    chrome.storage.onChanged.addListener((changes, area) => {
+    chrome.storage.onChanged?.addListener?.((changes, area) => {
       if (area !== "local") return;
       if (!changes.modEnabled && !changes.builtinEnabled) return;
       storage.get(["modEnabled", "builtinEnabled"], (data) => {
-        applyEnabled(readEnabled(data));
+        applyEnabled(readEnabled(data || {}));
       });
     });
   }
@@ -742,7 +757,7 @@
       if (!el.isConnected) homes.delete(el);
     });
 
-    if (document.querySelector("ytmusic-miniplayer")) return;
+    if (document.querySelector("ytmusic-miniplayer") && !findBar()) return;
 
     const bar = findBar();
     if (!bar) return;

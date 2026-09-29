@@ -262,8 +262,8 @@ async function registerRunnableScripts() {
           id: mod.id,
           matches: mod.matches,
           js: [{ code: isBuiltin ? wrapBuiltinMod(mod.id, mod.js) : wrapUserCode(mod.js) }],
-          runAt: isBuiltin ? "document_start" : "document_end",
-          world: mod.mainWorld ? "MAIN" : "USER_SCRIPT",
+          runAt: "document_end",
+          world: isBuiltin || mod.mainWorld ? "MAIN" : "USER_SCRIPT",
         },
       ]);
     } catch (error) {
@@ -387,35 +387,9 @@ function wrapBuiltinMod(modId, code) {
     "'use strict';\n" +
     "(function () {\n" +
     "  try {\n" +
-    "    var id = " +
+    "    globalThis.__SAI_FORCE_ENABLED = " +
     id +
     ";\n" +
-    "    var api = globalThis.chrome || {};\n" +
-    "    if (!api.storage || !api.storage.local || !api.storage.onChanged) {\n" +
-    "      var enabled = {};\n" +
-    "      enabled[id] = true;\n" +
-    "      var state = { modEnabled: enabled, builtinEnabled: Object.assign({}, enabled) };\n" +
-    "      api.storage = {\n" +
-    "        local: {\n" +
-    "          get: function (keys, cb) {\n" +
-    "            var out = {};\n" +
-    "            if (!keys) out = Object.assign({}, state);\n" +
-    "            else if (Array.isArray(keys)) keys.forEach(function (key) { out[key] = state[key]; });\n" +
-    "            else if (typeof keys === 'string') out[keys] = state[keys];\n" +
-    "            else Object.keys(keys).forEach(function (key) { out[key] = state[key]; });\n" +
-    "            if (cb) cb(out);\n" +
-    "            return Promise.resolve(out);\n" +
-    "          },\n" +
-    "          set: function (value, cb) {\n" +
-    "            Object.keys(value || {}).forEach(function (key) { state[key] = value[key]; });\n" +
-    "            if (cb) cb();\n" +
-    "            return Promise.resolve();\n" +
-    "          }\n" +
-    "        },\n" +
-    "        onChanged: { addListener: function () {} }\n" +
-    "      };\n" +
-    "      globalThis.chrome = api;\n" +
-    "    }\n" +
     code +
     "\n" +
     "  } catch (error) {\n" +
