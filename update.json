@@ -1,6 +1,6 @@
 {
-  "version": "1.4.4",
-  "releaseNotes": "Classic bar: show track title again and fix the vertical volume popup; also works on the older player bar.",
+  "version": "1.4.5",
+  "releaseNotes": "Classic bar title and volume fixes. Player-bar mods now load from the GitHub sync so Update applies them.",
   "mods": [
     {
       "id": "ytmusic-classic",
