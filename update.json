@@ -1,0 +1,16 @@
+{
+  "version": "1.2.0",
+  "releaseNotes": "Update checks from GitHub, remote mod sync, modern player bar pinned to the bottom, classic and modern YouTube Music layouts.",
+  "remoteMods": [
+    {
+      "id": "remote-ytm-hide-upsell",
+      "name": "YouTube Music: quieter chrome",
+      "description": "Softens a few promotional chips on music.youtube.com. Fetched from GitHub so it can change without reinstalling the extension.",
+      "matches": ["*://music.youtube.com/*"],
+      "css": "ytmusic-mealbar-promo-renderer,\nytmusic-popup-container tp-yt-paper-dialog.ytmusic-mealbar-promo-renderer {\n  display: none !important;\n}\n",
+      "js": "",
+      "mainWorld": false,
+      "enabledByDefault": false
+    }
+  ]
+}

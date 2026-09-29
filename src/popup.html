@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SAI Mods</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body class="popup">
+  <header class="top">
+    <div class="mark" aria-hidden="true"></div>
+    <div>
+      <h1>SAI Mods</h1>
+      <p>Appearance mods for the sites you choose</p>
+    </div>
+  </header>
+
+  <section class="update-card" aria-label="Updates">
+    <div class="update-head">
+      <div>
+        <div class="section-label tight">Updates</div>
+        <p id="version-line" class="update-version">Version …</p>
+      </div>
+      <button id="update" class="primary compact" type="button">Update</button>
+    </div>
+    <p id="update-status" class="update-status" hidden></p>
+    <div id="update-actions" class="update-actions" hidden>
+      <button id="download" class="ghost" type="button">Download ZIP</button>
+      <button id="open-github" class="ghost" type="button">Open GitHub</button>
+    </div>
+    <p class="update-hint">Checks GitHub for a newer package, syncs remote mods, and opens download links when an update is available.</p>
+  </section>
+
+  <div class="section-label">Built-in</div>
+  <div id="builtin" class="list"></div>
+  <div class="section-label">From GitHub</div>
+  <div id="remote" class="list"></div>
+  <p id="remote-empty" class="empty">No remote mods yet. Press Update to sync from GitHub.</p>
+  <div class="section-label">Yours</div>
+  <div id="custom" class="list"></div>
+  <p id="empty" class="empty" hidden>No custom mods yet. Create one and paste CSS or JavaScript.</p>
+  <div class="footer">
+    <button id="create" class="primary" type="button">Create mod</button>
+  </div>
+  <p class="note">Custom JavaScript needs the Allow user scripts permission on the extension page. CSS applies immediately. Reload the tab after changing a script. After downloading a new ZIP, replace the extension folder and click Reload on chrome://extensions.</p>
+  <script src="shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
