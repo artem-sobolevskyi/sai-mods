@@ -1,6 +1,6 @@
 {
   "version": "1.4.8",
-  "releaseNotes": "Keep the classic player bar fixed at the bottom instead of sitting in page flow.",
+  "releaseNotes": "Player-bar mods load from GitHub via Update (userScripts). Classic stays pinned to the bottom.",
   "mods": [
     {
       "id": "ytmusic-classic",
