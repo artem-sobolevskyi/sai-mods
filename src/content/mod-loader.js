@@ -32,7 +32,6 @@
     for (const mod of mods) {
       if (!mod?.id || !String(mod.js || "").trim()) continue;
       // Packaged player-bar mods run as content scripts — avoid double start.
-      // MV3 also blocks new Function/eval in content scripts, so those must stay packaged.
       if (SAI.BUILTIN_IDS.includes(mod.id)) continue;
       if (!SAI.isModEnabled(mod.id, enabledMap, mod)) continue;
       if (mod.matches?.length && !SAI.urlMatches(location.href, mod.matches)) continue;

@@ -220,12 +220,7 @@ async function registerRunnableScripts() {
 
   const ours = existing
     .map((script) => script.id)
-    .filter(
-      (id) =>
-        id.startsWith("custom-") ||
-        id.startsWith("remote-") ||
-        SAI.BUILTIN_IDS.includes(id)
-    );
+    .filter((id) => id.startsWith("custom-") || id.startsWith("remote-"));
   if (ours.length) {
     try {
       await chrome.userScripts.unregister({ ids: ours });
@@ -246,6 +241,7 @@ async function registerRunnableScripts() {
   }
 
   for (const mod of Array.isArray(data.syncedMods) ? data.syncedMods : []) {
+    if (mod.group === "builtin") continue;
     if (!String(mod.js || "").trim() || !mod.matches?.length) continue;
     const on = Object.prototype.hasOwnProperty.call(enabledMap, mod.id)
       ? enabledMap[mod.id] === true
@@ -256,14 +252,13 @@ async function registerRunnableScripts() {
   const errors = [];
   for (const mod of runnable) {
     try {
-      const isBuiltin = SAI.BUILTIN_IDS.includes(mod.id) || mod.group === "builtin";
       await chrome.userScripts.register([
         {
           id: mod.id,
           matches: mod.matches,
-          js: [{ code: isBuiltin ? wrapBuiltinMod(mod.id, mod.js) : wrapUserCode(mod.js) }],
+          js: [{ code: wrapUserCode(mod.js) }],
           runAt: "document_end",
-          world: isBuiltin || mod.mainWorld ? "MAIN" : "USER_SCRIPT",
+          world: mod.mainWorld ? "MAIN" : "USER_SCRIPT",
         },
       ]);
     } catch (error) {
@@ -271,12 +266,7 @@ async function registerRunnableScripts() {
     }
   }
 
-  return {
-    ok: errors.length === 0,
-    needsPermission: false,
-    errors,
-    registered: runnable.map((mod) => mod.id),
-  };
+  return { ok: errors.length === 0, needsPermission: false, errors };
 }
 
 async function checkUpdates() {
@@ -379,26 +369,6 @@ function wrapUserCode(code) {
   return "'use strict';\ntry {\n" + code + "\n} catch (error) {\n  console.error('[SAI Mods]', error);\n}\n";
 }
 
-// User scripts cannot call chrome.storage, so player-bar mods get a tiny stub that
-// reports the mod as enabled. Toggle/Update re-register scripts and reload the tab.
-function wrapBuiltinMod(modId, code) {
-  const id = JSON.stringify(String(modId || ""));
-  return (
-    "'use strict';\n" +
-    "(function () {\n" +
-    "  try {\n" +
-    "    globalThis.__SAI_FORCE_ENABLED = " +
-    id +
-    ";\n" +
-    code +
-    "\n" +
-    "  } catch (error) {\n" +
-    "    console.error('[SAI Mods]', error);\n" +
-    "  }\n" +
-    "})();\n"
-  );
-}
-
 function permissionMessage() {
-  return "Turn on Allow user scripts for SAI Mods at chrome://extensions. Player-bar layouts and custom JavaScript need it so Update can load code from GitHub.";
+  return "To run pasted JavaScript, open chrome://extensions, find SAI Mods, and turn on Allow user scripts. CSS works without that permission.";
 }

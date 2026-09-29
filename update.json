@@ -1,6 +1,6 @@
 {
-  "version": "1.4.9",
-  "releaseNotes": "Player-bar mods start from the GitHub sync even when user-script storage cannot see the toggle.",
+  "version": "2.0.0",
+  "releaseNotes": "Classic bar: track title back in the center and the same vertical volume popup as Modern (click, drag, wheel). Modern timeline/volume fixes, black-background icons, and a cleaner Updates card.",
   "mods": [
     {
       "id": "ytmusic-classic",

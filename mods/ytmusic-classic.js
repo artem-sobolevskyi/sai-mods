@@ -7,6 +7,7 @@
   let enabled = false;
 
   const SLIDER_BOX = 32;
+
   const VOLUME_LOOK = {
     bar: 4,
     hoverBar: 4,
@@ -102,7 +103,8 @@
     ${p}.slider-knob-inner::before,
     ${p}.slider-knob-inner::after,
     ${p}#ink,
-    ${p}.translucent-knob {
+    ${p}paper-ripple,
+    ${p}.slider-markers {
       display: none !important;
     }
     `;
@@ -112,8 +114,7 @@
     html.sai-ytm-classic #player-bar-background,
     html.sai-ytm-classic ytmusic-app-layout,
     :host(.sai-classic-on),
-    html.sai-ytm-classic ytmusic-miniplayer.sai-classic-on,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on {
+    html.sai-ytm-classic ytmusic-miniplayer.sai-classic-on {
       overflow: visible !important;
     }
 
@@ -125,40 +126,6 @@
       min-height: 72px !important;
       max-height: 72px !important;
       box-sizing: border-box !important;
-    }
-
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on ~ #player-bar-background,
-    html.sai-ytm-classic #player-bar-background {
-      position: fixed !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      top: auto !important;
-      width: 100% !important;
-      height: 72px !important;
-      max-height: 72px !important;
-      z-index: 4 !important;
-      transform: none !important;
-    }
-
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on {
-      position: fixed !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      top: auto !important;
-      inset: auto 0 0 0 !important;
-      width: 100% !important;
-      height: 72px !important;
-      min-height: 72px !important;
-      max-height: 72px !important;
-      z-index: 5 !important;
-      transform: none !important;
-      display: block !important;
-      box-sizing: border-box !important;
-      overflow: visible !important;
-      margin: 0 !important;
-      background: rgb(33, 33, 33) !important;
     }
 
     :host-context(html.sai-ytm-classic) .ytMusicMiniPlayerProgressBarWrapper,
@@ -196,19 +163,6 @@
       overflow: visible !important;
     }
 
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on > .sai-classic-row {
-      position: absolute !important;
-      left: 0 !important;
-      right: 0 !important;
-      top: 0 !important;
-      bottom: auto !important;
-      height: 72px !important;
-      padding: 0 12px !important;
-      z-index: 20 !important;
-      margin: 0 !important;
-      transform: none !important;
-    }
-
     :host-context(html.sai-ytm-classic) .sai-left,
     :host-context(html.sai-ytm-classic) .sai-right,
     html.sai-ytm-classic .sai-left,
@@ -232,14 +186,35 @@
 
     :host-context(html.sai-ytm-classic) .sai-middle,
     html.sai-ytm-classic .sai-middle {
-      flex: 0 1 auto !important;
+      flex: 1 1 0 !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      gap: 8px !important;
+      gap: 10px !important;
       min-width: 0 !important;
-      max-width: 46% !important;
+      max-width: none !important;
       overflow: visible !important;
+    }
+
+    :host-context(html.sai-ytm-classic) .sai-middle ytmusic-track-info,
+    :host-context(html.sai-ytm-classic) .sai-middle .ytmusicTrackInfoHost,
+    :host-context(html.sai-ytm-classic) .sai-middle .ytMusicMiniPlayerTrackInfo,
+    html.sai-ytm-classic .sai-middle ytmusic-track-info,
+    html.sai-ytm-classic .sai-middle .ytmusicTrackInfoHost,
+    html.sai-ytm-classic .sai-middle .ytMusicMiniPlayerTrackInfo {
+      position: relative !important;
+      top: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+      transform: none !important;
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      max-width: min(360px, 42vw) !important;
+      pointer-events: auto !important;
     }
 
     :host-context(html.sai-ytm-classic) .sai-vacated,
@@ -254,11 +229,7 @@
     html.sai-ytm-classic .sai-classic-on .ytmusicPlayerControlsControlButton:not([hidden]) button,
     html.sai-ytm-classic .sai-classic-on .ytMusicMiniPlayerVolumeWrapper button,
     html.sai-ytm-classic .sai-classic-on .sai-middle .ytMusicMiniPlayerActionBar button,
-    html.sai-ytm-classic .sai-classic-on .sai-middle [client-ve-type="7591"] button,
-    html.sai-ytm-classic .sai-classic-on .sai-left yt-icon-button button,
-    html.sai-ytm-classic .sai-classic-on .sai-right yt-icon-button button,
-    html.sai-ytm-classic .sai-classic-on .sai-middle yt-icon-button button,
-    html.sai-ytm-classic .sai-classic-on .sai-volume-wrap yt-icon-button button {
+    html.sai-ytm-classic .sai-classic-on .sai-middle [client-ve-type="7591"] button {
       width: 36px !important;
       height: 36px !important;
       min-width: 36px !important;
@@ -276,17 +247,12 @@
     html.sai-ytm-classic .sai-classic-on .ytmusicPlayerControlsControlButton:not([hidden]) button:hover,
     html.sai-ytm-classic .sai-classic-on .ytMusicMiniPlayerVolumeWrapper button:hover,
     html.sai-ytm-classic .sai-classic-on .sai-middle .ytMusicMiniPlayerActionBar button:hover,
-    html.sai-ytm-classic .sai-classic-on .sai-middle [client-ve-type="7591"] button:hover,
-    html.sai-ytm-classic .sai-classic-on .sai-left yt-icon-button:hover button,
-    html.sai-ytm-classic .sai-classic-on .sai-right yt-icon-button:hover button,
-    html.sai-ytm-classic .sai-classic-on .sai-middle yt-icon-button:hover button,
-    html.sai-ytm-classic .sai-classic-on .sai-volume-wrap yt-icon-button:hover button {
+    html.sai-ytm-classic .sai-classic-on .sai-middle [client-ve-type="7591"] button:hover {
       background: rgba(255, 255, 255, 0.1) !important;
     }
 
     :host-context(html.sai-ytm-classic) .ytmusicPlayerControlsPlayPauseButton.ytmusicPlayerControlsControlButton:not([hidden]) button,
-    html.sai-ytm-classic .sai-classic-on .ytmusicPlayerControlsPlayPauseButton.ytmusicPlayerControlsControlButton:not([hidden]) button,
-    html.sai-ytm-classic .sai-classic-on .sai-left #play-pause-button button {
+    html.sai-ytm-classic .sai-classic-on .ytmusicPlayerControlsPlayPauseButton.ytmusicPlayerControlsControlButton:not([hidden]) button {
       width: 48px !important;
       height: 48px !important;
       min-width: 48px !important;
@@ -300,24 +266,19 @@
     html.sai-ytm-classic .sai-classic-on .ytmusicPlayerControlsControlButton .ytIconWrapperHost,
     html.sai-ytm-classic .sai-classic-on .ytMusicMiniPlayerVolumeWrapper .ytIconWrapperHost,
     html.sai-ytm-classic .sai-classic-on .sai-middle .ytIconWrapperHost,
-    html.sai-ytm-classic .sai-classic-on .sai-middle yt-icon,
-    html.sai-ytm-classic .sai-classic-on .sai-left yt-icon,
-    html.sai-ytm-classic .sai-classic-on .sai-right yt-icon,
-    html.sai-ytm-classic .sai-classic-on .sai-volume-wrap yt-icon {
+    html.sai-ytm-classic .sai-classic-on .sai-middle yt-icon {
       width: 24px !important;
       height: 24px !important;
     }
 
     :host-context(html.sai-ytm-classic) .ytmusicPlayerControlsPlayPauseButton .ytIconWrapperHost,
-    html.sai-ytm-classic .sai-classic-on .ytmusicPlayerControlsPlayPauseButton .ytIconWrapperHost,
-    html.sai-ytm-classic .sai-classic-on .sai-left #play-pause-button yt-icon {
+    html.sai-ytm-classic .sai-classic-on .ytmusicPlayerControlsPlayPauseButton .ytIconWrapperHost {
       width: 28px !important;
       height: 28px !important;
     }
 
     :host-context(html.sai-ytm-classic) .ytMusicMiniPlayerTimeInfo,
-    html.sai-ytm-classic .sai-classic-on .ytMusicMiniPlayerTimeInfo,
-    html.sai-ytm-classic .sai-classic-on .sai-left .time-info {
+    html.sai-ytm-classic .sai-classic-on .ytMusicMiniPlayerTimeInfo {
       margin: 0 8px 0 10px !important;
       font-size: 12px !important;
       line-height: 1.2 !important;
@@ -327,72 +288,17 @@
       flex: none !important;
     }
 
-    :host-context(html.sai-ytm-classic) .sai-middle ytmusic-track-info,
-    :host-context(html.sai-ytm-classic) .sai-middle .ytmusicTrackInfoHost,
-    :host-context(html.sai-ytm-classic) .sai-middle .ytMusicMiniPlayerTrackInfo,
-    :host-context(html.sai-ytm-classic) .sai-middle [class*="TrackInfo"],
-    html.sai-ytm-classic .sai-middle ytmusic-track-info,
-    html.sai-ytm-classic .sai-middle .ytmusicTrackInfoHost,
-    html.sai-ytm-classic .sai-middle .ytMusicMiniPlayerTrackInfo,
-    html.sai-ytm-classic .sai-middle [class*="TrackInfo"],
-    html.sai-ytm-classic .sai-middle .content-info-wrapper,
-    html.sai-ytm-classic .sai-middle .thumbnail-image-wrapper {
+    :host-context(html.sai-ytm-classic) ytmusic-track-info,
+    :host-context(html.sai-ytm-classic) .ytmusicTrackInfoHost,
+    html.sai-ytm-classic .sai-classic-on ytmusic-track-info,
+    html.sai-ytm-classic .sai-classic-on .ytmusicTrackInfoHost {
       display: flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
       flex-direction: row !important;
       align-items: center !important;
-      gap: 12px !important;
+      gap: 16px !important;
       min-width: 0 !important;
       max-width: 360px !important;
       flex: 0 1 auto !important;
-      overflow: hidden !important;
-    }
-
-    html.sai-ytm-classic .sai-middle .content-info-wrapper {
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 2px !important;
-      max-width: 280px !important;
-    }
-
-    html.sai-ytm-classic .sai-middle .thumbnail-image-wrapper {
-      width: 40px !important;
-      height: 40px !important;
-      flex: none !important;
-      max-width: 40px !important;
-      border-radius: 2px !important;
-      overflow: hidden !important;
-    }
-
-    html.sai-ytm-classic .sai-middle .thumbnail-image-wrapper img,
-    html.sai-ytm-classic .sai-middle .thumbnail-image-wrapper .image {
-      width: 40px !important;
-      height: 40px !important;
-      object-fit: cover !important;
-      border-radius: 2px !important;
-    }
-
-    html.sai-ytm-classic .sai-middle .content-info-wrapper .title {
-      font-size: 16px !important;
-      line-height: 1.2 !important;
-      color: #fff !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      white-space: nowrap !important;
-      max-width: 280px !important;
-    }
-
-    html.sai-ytm-classic .sai-middle .content-info-wrapper .subtitle,
-    html.sai-ytm-classic .sai-middle .content-info-wrapper .byline,
-    html.sai-ytm-classic .sai-middle .content-info-wrapper .byline-wrapper {
-      font-size: 12px !important;
-      line-height: 1.2 !important;
-      color: rgb(144, 144, 144) !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      white-space: nowrap !important;
-      max-width: 280px !important;
     }
 
     :host-context(html.sai-ytm-classic) .ytmusicTrackInfoThumbnailWrapper,
@@ -422,9 +328,7 @@
     }
 
     :host-context(html.sai-ytm-classic) .ytmusicTrackInfoTitle,
-    html.sai-ytm-classic .sai-classic-on .ytmusicTrackInfoTitle,
-    html.sai-ytm-classic .sai-middle [class*="TrackInfoTitle"],
-    html.sai-ytm-classic .sai-middle [class*="track-info"] .title {
+    html.sai-ytm-classic .sai-classic-on .ytmusicTrackInfoTitle {
       font-size: 16px !important;
       line-height: 1.2 !important;
       color: #fff !important;
@@ -435,9 +339,7 @@
     }
 
     :host-context(html.sai-ytm-classic) .ytmusicTrackInfoByline,
-    html.sai-ytm-classic .sai-classic-on .ytmusicTrackInfoByline,
-    html.sai-ytm-classic .sai-middle [class*="TrackInfoByline"],
-    html.sai-ytm-classic .sai-middle [class*="track-info"] .subtitle {
+    html.sai-ytm-classic .sai-classic-on .ytmusicTrackInfoByline {
       font-size: 12px !important;
       line-height: 1.2 !important;
       color: rgb(144, 144, 144) !important;
@@ -456,6 +358,11 @@
       flex: none !important;
       position: relative !important;
       overflow: visible !important;
+    }
+
+    html.sai-ytm-classic .sai-middle .ytMusicMiniPlayerActionBar,
+    html.sai-ytm-classic .sai-middle [client-ve-type="7591"] {
+      flex-shrink: 0 !important;
     }
 
     :host-context(html.sai-ytm-classic) .ytMusicMiniPlayerActionBar .ytSpecButtonShapeNextButtonTextContent,
@@ -512,6 +419,10 @@
       gap: 0 !important;
     }
 
+    html.sai-ytm-classic .sai-classic-on .ytMusicMiniPlayerVolumePopup:not(:has(tp-yt-paper-slider, #volume-slider)) {
+      display: none !important;
+    }
+
     html.sai-ytm-classic .sai-volume-wrap {
       position: relative !important;
       display: flex !important;
@@ -521,8 +432,7 @@
       flex: none !important;
     }
 
-    html.sai-ytm-classic .sai-volume-pop,
-    html.sai-ytm-classic .ytMusicMiniPlayerVolumePopup.sai-volume-bound {
+    html.sai-ytm-classic .sai-volume-pop {
       position: absolute !important;
       left: 50% !important;
       bottom: calc(100% + 8px) !important;
@@ -542,8 +452,7 @@
       overflow: visible !important;
     }
 
-    html.sai-ytm-classic .sai-volume-pop::after,
-    html.sai-ytm-classic .ytMusicMiniPlayerVolumePopup.sai-volume-bound::after {
+    html.sai-ytm-classic .sai-volume-pop::after {
       content: "" !important;
       position: absolute !important;
       left: 0 !important;
@@ -552,24 +461,21 @@
       height: 12px !important;
     }
 
-    html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .sai-volume-pop,
-    html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .ytMusicMiniPlayerVolumePopup.sai-volume-bound,
-    html.sai-ytm-classic .ytMusicMiniPlayerVolumeWrapper.sai-volume-open .ytMusicMiniPlayerVolumePopup.sai-volume-bound {
+    html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .sai-volume-pop {
       opacity: 1 !important;
       visibility: visible !important;
       pointer-events: auto !important;
     }
 
+    html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .sai-volume-pop tp-yt-paper-slider,
     html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .sai-volume-pop #volume-slider,
-    html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .sai-volume-pop #volume-slider *,
-    html.sai-ytm-classic .sai-volume-open .ytMusicMiniPlayerVolumePopup tp-yt-paper-slider,
-    html.sai-ytm-classic .sai-volume-open .ytMusicMiniPlayerVolumePopup tp-yt-paper-slider * {
+    html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .sai-volume-pop tp-yt-paper-slider *,
+    html.sai-ytm-classic .sai-volume-wrap.sai-volume-open .sai-volume-pop #volume-slider * {
       pointer-events: auto !important;
     }
 
-    html.sai-ytm-classic .sai-volume-pop #volume-slider,
-    html.sai-ytm-classic .ytMusicMiniPlayerVolumePopup.sai-volume-bound tp-yt-paper-slider,
-    html.sai-ytm-classic .ytMusicMiniPlayerVolumePopup.sai-volume-bound #volume-slider {
+    html.sai-ytm-classic .sai-volume-pop tp-yt-paper-slider,
+    html.sai-ytm-classic .sai-volume-pop #volume-slider {
       position: absolute !important;
       left: 50% !important;
       top: 50% !important;
@@ -588,26 +494,7 @@
       overflow: visible !important;
     }
 
-    ${sliderCss("html.sai-ytm-classic .sai-volume-pop #volume-slider", VOLUME_LOOK)}
-    ${sliderCss("html.sai-ytm-classic .ytMusicMiniPlayerVolumePopup.sai-volume-bound tp-yt-paper-slider", VOLUME_LOOK)}
-    ${sliderCss("html.sai-ytm-classic .ytMusicMiniPlayerVolumePopup.sai-volume-bound #volume-slider", VOLUME_LOOK)}
-
-    html.sai-ytm-classic .sai-classic-on [hidden] {
-      display: none !important;
-    }
-
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on .expand-button,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on .toggle-player-page-button,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on .exit-fullscreen-button,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on ytmusic-player-expanding-menu,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on #expand-repeat,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on #expand-shuffle,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on #expand-volume,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on #expand-volume-slider,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on #right-controls .captions,
-    html.sai-ytm-classic ytmusic-player-bar.sai-classic-on .sai-vacated .captions {
-      display: none !important;
-    }
+    ${sliderCss("html.sai-ytm-classic .sai-volume-pop tp-yt-paper-slider, html.sai-ytm-classic .sai-volume-pop #volume-slider", VOLUME_LOOK)}
   `;
 
   function readEnabled(data) {
@@ -637,29 +524,16 @@
 
   function boot() {
     injectStyle(document.head || document.documentElement);
-    if (globalThis.__SAI_FORCE_ENABLED === MOD_ID) {
-      applyEnabled(true);
-      return;
-    }
     const storage = globalThis.chrome?.storage?.local;
-    if (!storage?.get) {
-      applyEnabled(true);
-      return;
-    }
+    if (!storage) return;
     storage.get(["modEnabled", "builtinEnabled"], (data) => {
-      const stored = data || {};
-      if (readEnabled(stored)) {
-        applyEnabled(true);
-        return;
-      }
-      const map = Object.assign({}, stored.builtinEnabled, stored.modEnabled);
-      applyEnabled(typeof map[MOD_ID] !== "boolean");
+      applyEnabled(readEnabled(data));
     });
-    chrome.storage.onChanged?.addListener?.((changes, area) => {
+    chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== "local") return;
       if (!changes.modEnabled && !changes.builtinEnabled) return;
       storage.get(["modEnabled", "builtinEnabled"], (data) => {
-        applyEnabled(readEnabled(data || {}));
+        applyEnabled(readEnabled(data));
       });
     });
   }
@@ -690,13 +564,11 @@
 
   function injectStyle(root) {
     if (!root) return;
-    let style = root.getElementById?.(STYLE_ID) || root.querySelector?.("#" + STYLE_ID);
-    if (!style) {
-      style = document.createElement("style");
-      style.id = STYLE_ID;
-      root.appendChild(style);
-    }
-    if (style.textContent !== CSS) style.textContent = CSS;
+    if (root.getElementById?.(STYLE_ID) || root.querySelector?.("#" + STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = CSS;
+    root.appendChild(style);
   }
 
   function walkShadows(node, visit) {
@@ -731,17 +603,11 @@
     return (
       document.querySelector("ytmusic-miniplayer") ||
       document.querySelector("ytmusic-app")?.shadowRoot?.querySelector("ytmusic-miniplayer") ||
-      document.querySelector("ytmusic-player-bar") ||
       null
     );
   }
 
-  function isPlayerBar(player) {
-    return player?.tagName === "YTMUSIC-PLAYER-BAR";
-  }
-
   function placementRoot(player) {
-    if (isPlayerBar(player)) return player;
     if (player.querySelector(".ytMusicMiniPlayerProgressBarWrapper, .ytMusicMiniPlayerLeftSection")) {
       return player;
     }
@@ -816,123 +682,61 @@
     return el;
   }
 
-  function findMore(root) {
-    const all = queryDeep(root, '[client-ve-type="7591"]', []);
+  function findTrack(root) {
+    const selectors = ["ytmusic-track-info", ".ytmusicTrackInfoHost", ".ytMusicMiniPlayerTrackInfo"];
+    for (const selector of selectors) {
+      const matches = queryDeep(root, selector, []);
+      const track = matches.find((el) => !el.closest(".sai-volume-pop")) || matches[0];
+      if (track) return track;
+    }
+    const title = q(root, ".ytmusicTrackInfoTitle");
     return (
-      all.find((el) => el.parentElement?.classList?.contains("ytMusicMiniPlayerRightSection")) ||
-      all.find((el) => el.parentElement?.classList?.contains("sai-middle")) ||
-      all.find((el) => !el.closest(".ytMusicMiniPlayerVolumePopup")) ||
+      title?.closest?.("ytmusic-track-info, .ytmusicTrackInfoHost, .ytMusicMiniPlayerTrackInfo") ||
+      title?.closest?.(".ytMusicMiniPlayerMiddleSection > *") ||
       null
     );
   }
 
-  function looksLikeTrack(el) {
-    if (!el || el.classList?.contains("sai-classic-row")) return false;
-    if (el.classList?.contains("ytMusicMiniPlayerActionBar")) return false;
-    if (el.matches?.('[client-ve-type="7591"]')) return false;
-    if (el.classList?.contains("ytMusicMiniPlayerVolumeWrapper")) return false;
-    const cls = typeof el.className === "string" ? el.className : "";
-    if (/TrackInfo|track-info|SongInfo|song-info|content-info/i.test(cls + " " + (el.tagName || ""))) {
-      return true;
-    }
-    return !!(
-      el.querySelector?.(".ytmusicTrackInfoTitle, [class*='TrackInfoTitle'], .title, img, yt-img-shadow") &&
-      (el.textContent || "").trim().length > 0
-    );
+  function findVolumeParts(root) {
+    const wrapper = q(root, ".ytMusicMiniPlayerVolumeWrapper");
+    if (!wrapper) return {};
+    const popup = wrapper.querySelector(".ytMusicMiniPlayerVolumePopup");
+    const slider =
+      popup?.querySelector("tp-yt-paper-slider, #volume-slider") ||
+      wrapper.querySelector("tp-yt-paper-slider, #volume-slider");
+    const btn =
+      wrapper.querySelector("button") ||
+      wrapper.querySelector(".ytMusicMiniPlayerVolumeButton") ||
+      wrapper.querySelector(".ytMusicMiniPlayerVolumeIcon");
+    return { wrapper, popup, slider, btn };
   }
 
-  function findTrack(root) {
-    const known =
-      q(root, "ytmusic-track-info") ||
-      q(root, ".ytmusicTrackInfoHost") ||
-      q(root, ".ytMusicMiniPlayerTrackInfo") ||
-      q(root, "[class*='TrackInfoHost']") ||
-      q(root, "[class*='MiniPlayerTrackInfo']");
-    if (known) return known;
-
-    const mid = q(root, ".ytMusicMiniPlayerMiddleSection");
-    if (mid) {
-      for (const child of mid.children) {
-        if (looksLikeTrack(child)) return child;
-      }
-      for (const child of mid.querySelectorAll(":scope > *")) {
-        if (looksLikeTrack(child)) return child;
-      }
-    }
-    return null;
+  function volumeSliderRoot(pop) {
+    return pop.querySelector("#volume-slider, tp-yt-paper-slider");
   }
 
-  function sectionHas(section, selectors) {
-    return selectors.some((selector) => q(section, selector));
-  }
-
-  function vacateMini(root) {
-    [".ytMusicMiniPlayerLeftSection", ".ytMusicMiniPlayerMiddleSection", ".ytMusicMiniPlayerRightSection"].forEach(
-      (selector) => {
-        const section = q(root, selector);
-        if (!section) return;
-        const busy = sectionHas(section, [
-          ".ytmusicPlayerControlsPreviousButton",
-          ".ytmusicPlayerControlsPlayPauseButton",
-          ".ytmusicPlayerControlsNextButton",
-          "ytmusic-track-info",
-          ".ytmusicTrackInfoHost",
-          ".ytMusicMiniPlayerTrackInfo",
-          "[class*='TrackInfo']",
-          ".ytMusicMiniPlayerTimeInfo",
-          ".ytMusicMiniPlayerActionBar",
-          ".ytMusicMiniPlayerVolumeWrapper",
-          ".ytmusicPlayerControlsRepeatButton",
-          ".ytmusicPlayerControlsShuffleButton",
-          '[client-ve-type="7591"]',
-        ]);
-        section.classList.toggle("sai-vacated", !busy);
-      }
-    );
-  }
-
-  function vacateBar(bar) {
-    ["#left-controls", ".middle-controls", "#right-controls"].forEach((selector) => {
-      const section = bar.querySelector(selector);
-      if (!section) return;
-      const busy = [
-        ".previous-button",
-        "#play-pause-button",
-        ".next-button",
-        ".time-info",
-        ".thumbnail-image-wrapper",
-        ".content-info-wrapper",
-        "#like-button-renderer",
-        "ytmusic-menu-renderer.menu",
-        "#volume-slider",
-        ".volume",
-        ".repeat",
-        ".shuffle",
-        ".sai-classic-row",
-      ].some((sel) => section.querySelector(sel));
-      section.classList.toggle("sai-vacated", !busy);
-    });
+  function sliderBarEl(pop) {
+    const slider = volumeSliderRoot(pop);
+    if (!slider) return null;
+    return slider.shadowRoot?.querySelector("#sliderBar") || slider.querySelector("#sliderBar");
   }
 
   function bindVerticalVolume(pop) {
-    if (pop.dataset.saiVolBound) return;
-    pop.dataset.saiVolBound = "1";
     let dragging = false;
     let forwarding = false;
-    const sliderBar = () =>
-      pop.querySelector("#volume-slider #sliderBar") ||
-      pop.querySelector("tp-yt-paper-slider #sliderBar") ||
-      pop.querySelector("#sliderBar");
 
     function pointFor(ratio) {
-      const bar = sliderBar();
+      const bar = sliderBarEl(pop);
+      if (!bar) return { x: 0, y: 0 };
       const rect = bar.getBoundingClientRect();
       const clamped = Math.min(1, Math.max(0, ratio));
       return { x: rect.left + clamped * bar.offsetWidth, y: rect.top + rect.height / 2 };
     }
 
     function ratioFromEvent(event) {
-      const rect = sliderBar().getBoundingClientRect();
+      const bar = sliderBarEl(pop);
+      if (!bar) return 0;
+      const rect = bar.getBoundingClientRect();
       return rect.height ? (rect.bottom - event.clientY) / rect.height : 0;
     }
 
@@ -962,11 +766,11 @@
       "mousedown",
       (event) => {
         if (forwarding || event.button !== 0 || !pop.isConnected) return;
-        if (!(event.target instanceof Node) || !pop.contains(event.target) || !sliderBar()) return;
+        if (!(event.target instanceof Node) || !pop.contains(event.target) || !sliderBarEl(pop)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         dragging = true;
-        send("mousedown", sliderBar(), ratioFromEvent(event));
+        send("mousedown", sliderBarEl(pop), ratioFromEvent(event));
       },
       true
     );
@@ -1008,37 +812,16 @@
     pop.addEventListener(
       "wheel",
       (event) => {
-        const slider =
-          pop.querySelector("#volume-slider") || pop.querySelector("tp-yt-paper-slider");
-        if (!slider || !sliderBar()) return;
+        const slider = volumeSliderRoot(pop);
+        if (!slider || !sliderBarEl(pop)) return;
         event.preventDefault();
         const current = Number(slider.getAttribute("aria-valuenow")) || 0;
         const next = (current + (event.deltaY < 0 ? 5 : -5)) / 100;
-        send("mousedown", sliderBar(), next);
+        send("mousedown", sliderBarEl(pop), next);
         send("mouseup", document, next);
       },
       { passive: false }
     );
-  }
-
-  function bindHoverOpen(wrap) {
-    if (wrap.dataset.saiBound) return;
-    wrap.dataset.saiBound = "1";
-    let closeTimer = 0;
-    const open = () => {
-      clearTimeout(closeTimer);
-      wrap.classList.add("sai-volume-open");
-    };
-    const close = () => {
-      clearTimeout(closeTimer);
-      closeTimer = setTimeout(() => wrap.classList.remove("sai-volume-open"), 250);
-    };
-    wrap.addEventListener("mouseenter", open);
-    wrap.addEventListener("mouseleave", close);
-    wrap.addEventListener("focusin", open);
-    wrap.addEventListener("focusout", (event) => {
-      if (!wrap.contains(event.relatedTarget)) close();
-    });
   }
 
   function ensureVolumeWrap(right, volumeBtn, volumeSlider) {
@@ -1063,44 +846,98 @@
       remember(volumeBtn);
       wrap.appendChild(volumeBtn);
     }
-    bindHoverOpen(wrap);
-    return wrap;
-  }
-
-  function ensureMiniVolume(volumeWrap) {
-    if (!volumeWrap) return null;
-    const pop =
-      volumeWrap.querySelector(".ytMusicMiniPlayerVolumePopup") ||
-      q(volumeWrap, ".ytMusicMiniPlayerVolumePopup");
-    if (pop) {
-      pop.classList.add("sai-volume-bound");
-      bindVerticalVolume(pop);
-      styleSliderShadow(
-        pop.querySelector("tp-yt-paper-slider, #volume-slider"),
-        "sai-volume-fix",
-        VOLUME_LOOK
-      );
+    if (!wrap.dataset.saiBound) {
+      wrap.dataset.saiBound = "1";
+      let closeTimer = 0;
+      const open = () => {
+        clearTimeout(closeTimer);
+        wrap.classList.add("sai-volume-open");
+      };
+      const close = () => {
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => wrap.classList.remove("sai-volume-open"), 250);
+      };
+      wrap.addEventListener("mouseenter", open);
+      wrap.addEventListener("mouseleave", close);
+      wrap.addEventListener("focusin", open);
+      wrap.addEventListener("focusout", (event) => {
+        if (!wrap.contains(event.relatedTarget)) close();
+      });
     }
-    bindHoverOpen(volumeWrap);
-    return volumeWrap;
+    return wrap;
   }
 
   function styleSliderShadow(slider, styleId, look) {
     if (!slider) return;
-    slider.querySelectorAll(":scope > #sai-progress-fix, :scope > #sai-volume-fix").forEach((el) => el.remove());
-    const root = slider.shadowRoot;
-    if (!root) return;
-    let style = root.getElementById(styleId);
-    if (!style) {
-      style = document.createElement("style");
-      style.id = styleId;
-      root.appendChild(style);
-    }
-    const next = sliderCss("", look);
-    if (style.textContent !== next) style.textContent = next;
+    slider.querySelectorAll(":scope > #sai-volume-fix").forEach((el) => el.remove());
+    const roots = [];
+    if (slider.shadowRoot) roots.push(slider.shadowRoot);
+    slider.shadowRoot?.querySelectorAll("*").forEach((el) => {
+      if (el.shadowRoot) roots.push(el.shadowRoot);
+    });
+    const cssText = sliderCss("", look);
+    roots.forEach((root) => {
+      let style = root.querySelector(`#${styleId}`);
+      if (!style) {
+        style = document.createElement("style");
+        style.id = styleId;
+        root.appendChild(style);
+      }
+      if (style.textContent !== cssText) style.textContent = cssText;
+    });
   }
 
-  function applyMini(player) {
+  function styleVolumeSlider(wrap) {
+    const slider = wrap?.querySelector(".sai-volume-pop tp-yt-paper-slider, .sai-volume-pop #volume-slider");
+    styleSliderShadow(slider, "sai-volume-fix", VOLUME_LOOK);
+  }
+
+  function findMore(root) {
+    const all = queryDeep(root, '[client-ve-type="7591"]', []);
+    return (
+      all.find((el) => el.parentElement?.classList?.contains("ytMusicMiniPlayerRightSection")) ||
+      all.find((el) => el.parentElement?.classList?.contains("sai-middle")) ||
+      all.find((el) => !el.closest(".ytMusicMiniPlayerVolumePopup")) ||
+      null
+    );
+  }
+
+  function sectionHas(section, selectors) {
+    return selectors.some((selector) => q(section, selector));
+  }
+
+  function vacate(root) {
+    [".ytMusicMiniPlayerLeftSection", ".ytMusicMiniPlayerMiddleSection", ".ytMusicMiniPlayerRightSection"].forEach(
+      (selector) => {
+        const section = q(root, selector);
+        if (!section) return;
+        const busy = sectionHas(section, [
+          ".ytmusicPlayerControlsPreviousButton",
+          ".ytmusicPlayerControlsPlayPauseButton",
+          ".ytmusicPlayerControlsNextButton",
+          "ytmusic-track-info",
+          ".ytmusicTrackInfoHost",
+          ".ytMusicMiniPlayerTrackInfo",
+          ".ytMusicMiniPlayerTimeInfo",
+          ".ytMusicMiniPlayerActionBar",
+          ".ytMusicMiniPlayerVolumeWrapper",
+          ".ytmusicPlayerControlsRepeatButton",
+          ".ytmusicPlayerControlsShuffleButton",
+          '[client-ve-type="7591"]',
+        ]);
+        section.classList.toggle("sai-vacated", !busy);
+      }
+    );
+  }
+
+  function apply() {
+    homes.forEach((_home, el) => {
+      if (!el.isConnected) homes.delete(el);
+    });
+    const player = findPlayer();
+    if (!player) return;
+    player.classList.add("sai-classic-on");
+    injectStyle(document.head || document.documentElement);
     if (player.shadowRoot) injectStyle(player.shadowRoot);
     walkShadows(player, injectStyle);
 
@@ -1112,69 +949,24 @@
     const seekForward = q(root, ".ytmusicPlayerControlsSeekForwardButton");
     const next = q(root, ".ytmusicPlayerControlsNextButton");
     const time = q(root, ".ytMusicMiniPlayerTimeInfo");
-    const track = findTrack(root);
+    let track = findTrack(root);
+    if (!track) track = findTrack(player) || findTrack(player.shadowRoot);
     const likes = q(root, ".ytMusicMiniPlayerActionBar") || q(root, "yt-video-action-bar-view-model");
     const more = findMore(root);
-    const volume = q(root, ".ytMusicMiniPlayerVolumeWrapper");
+    const { wrapper: volumeWrapper, slider: volumeSlider, btn: volumeBtn } = findVolumeParts(root);
     const rate = q(root, ".ytmusicPlayerControlsPlaybackRateButton");
     const repeat = q(root, ".ytmusicPlayerControlsRepeatButton");
     const shuffle = q(root, ".ytmusicPlayerControlsShuffleButton");
 
     placeSequence(columns.left, [previous, seekBack, play, seekForward, next, time]);
     placeSequence(columns.middle, [track, likes, more]);
-    placeSequence(columns.right, [volume, rate, repeat, shuffle]);
-    ensureMiniVolume(volume);
-    vacateMini(root);
-  }
-
-  function applyBar(bar) {
-    const columns = ensureColumns(bar);
-    const previous = bar.querySelector(".previous-button");
-    const rewind = bar.querySelector(".rewind-button");
-    const play = bar.querySelector("#play-pause-button");
-    const spinner = bar.querySelector(".spinner-container");
-    const seekForward = bar.querySelector(
-      ".left-controls-buttons > yt-icon-button[aria-label*='30'], .left-controls-buttons > yt-icon-button[title*='30']"
-    );
-    const next = bar.querySelector(".next-button");
-    const time = bar.querySelector(".time-info");
-    const thumb = bar.querySelector(".thumbnail-image-wrapper");
-    const content = bar.querySelector(".content-info-wrapper");
-    const likes = bar.querySelector("#like-button-renderer");
-    const menu =
-      bar.querySelector("ytmusic-menu-renderer.menu") ||
-      bar.querySelector(".middle-controls-buttons ytmusic-menu-renderer");
-    const volumeBtn =
-      bar.querySelector(".right-controls-buttons > .volume") ||
-      bar.querySelector(".volume:not(#expand-volume)");
-    const volumeSlider = bar.querySelector("#volume-slider:not(#expand-volume-slider)");
-    const rate = bar.querySelector("ytmusic-playback-rate-renderer");
-    const repeat =
-      bar.querySelector(".right-controls-buttons > .repeat") ||
-      bar.querySelector(".repeat:not(#expand-repeat)");
-    const shuffle =
-      bar.querySelector(".right-controls-buttons > .shuffle") ||
-      bar.querySelector(".shuffle:not(#expand-shuffle)");
-
-    placeSequence(columns.left, [previous, rewind, play, spinner, seekForward, next, time]);
-    placeSequence(columns.middle, [thumb, content, likes, menu]);
-    const wrap = ensureVolumeWrap(columns.right, volumeBtn, volumeSlider);
-    placeSequence(columns.right, [wrap, rate, repeat, shuffle]);
-    styleSliderShadow(bar.querySelector(".sai-volume-pop #volume-slider"), "sai-volume-fix", VOLUME_LOOK);
-    vacateBar(bar);
-  }
-
-  function apply() {
-    homes.forEach((_home, el) => {
-      if (!el.isConnected) homes.delete(el);
-    });
-    const player = findPlayer();
-    if (!player) return;
-    player.classList.add("sai-classic-on");
-    injectStyle(document.head || document.documentElement);
-
-    if (isPlayerBar(player)) applyBar(player);
-    else applyMini(player);
+    const volumeWrap = ensureVolumeWrap(columns.right, volumeBtn, volumeSlider);
+    placeSequence(columns.right, [volumeWrap, rate, repeat, shuffle]);
+    styleVolumeSlider(volumeWrap);
+    if (volumeWrapper && !volumeWrapper.querySelector("button, tp-yt-paper-slider, #volume-slider")) {
+      volumeWrapper.classList.add("sai-vacated");
+    }
+    vacate(root);
   }
 
   function restore() {
@@ -1202,20 +994,23 @@
     });
     homes.clear();
     const player = findPlayer();
-    [document, player, player?.shadowRoot].forEach((root) => {
-      root?.querySelectorAll?.(".sai-volume-pop, .sai-volume-wrap, .sai-classic-row").forEach((el) => {
+    document
+      .querySelectorAll(".sai-classic-row, .sai-volume-wrap, .sai-volume-pop")
+      .forEach((el) => {
         while (el.firstChild) el.parentNode?.insertBefore(el.firstChild, el);
         el.remove();
       });
+    [document, player, player?.shadowRoot].forEach((root) => {
+      root?.querySelectorAll?.(".sai-classic-row").forEach((row) => row.remove());
       root?.querySelectorAll?.(".sai-vacated").forEach((el) => el.classList.remove("sai-vacated"));
       root?.querySelectorAll?.(".sai-classic-on").forEach((el) => el.classList.remove("sai-classic-on"));
-      root?.querySelectorAll?.(".sai-volume-bound").forEach((el) => el.classList.remove("sai-volume-bound"));
-      root?.querySelectorAll?.(".sai-volume-open").forEach((el) => el.classList.remove("sai-volume-open"));
+      root?.querySelectorAll?.("tp-yt-paper-slider, #volume-slider").forEach((slider) => {
+        [slider, slider.shadowRoot].forEach((part) => {
+          part?.querySelectorAll?.("#sai-volume-fix").forEach((style) => style.remove());
+        });
+      });
     });
     player?.classList.remove("sai-classic-on");
-    document.querySelectorAll("#volume-slider").forEach((slider) => {
-      slider.shadowRoot?.querySelectorAll?.("#sai-volume-fix").forEach((style) => style.remove());
-    });
   }
 
   boot();
